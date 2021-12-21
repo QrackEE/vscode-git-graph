@@ -52,6 +52,7 @@ code{
 
 #content{
 	position:relative;
+	overflow: scroll;
 }
 
 
@@ -641,8 +642,19 @@ svg.openFolderIcon, svg.closedFolderIcon, svg.fileIcon{
 	margin-top:3px;
 	margin-right:4px;
 }
-
-
+#tableColHeaders{
+	display: none;
+}
+#commitTable{
+	margin-left: 20px;
+}
+.commit td{
+	line-height: 18px;
+    padding: 6px 12px;
+}
+.commit td:nth-child(1) {
+	padding: 6px 13px;
+}
 /* Commit Emphasis */
 
 .commitHeadDot{

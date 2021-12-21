@@ -6,7 +6,7 @@ export const CLASS_CONTEXT_MENU_ACTIVE = 'contextMenuActive';
 export interface ContextMenuAction {
 	readonly title: string;
 	readonly visible: boolean;
-	readonly onClick: () => void;
+	readonly onClick: (e:Event) => void;
 	readonly checked?: boolean; // Required in checked context menus
 }
 
@@ -49,7 +49,7 @@ export class ContextMenu {
 	 * @param className An optional class name to add to the context menu.
 	 */
 	public show(actions: ContextMenuActions, checked: boolean, target: ContextMenuTarget | null, event: MouseEvent, frameElem: HTMLElement, onClose: (() => void) | null = null, className: string | null = null) {
-		let html = '', handlers: (() => void)[] = [], handlerId = 0;
+		let html = '', handlers: ((e:Event) => void)[] = [], handlerId = 0;
 		this.close();
 
 		for (let i = 0; i < actions.length; i++) {
@@ -95,7 +95,7 @@ export class ContextMenu {
 			// The user clicked on a context menu item => call the corresponding handler
 			e.stopPropagation();
 			this.close();
-			handlers[parseInt((<HTMLElement>(<Element>e.target).closest('.contextMenuItem')!).dataset.index!)]();
+			handlers[parseInt((<HTMLElement>(<Element>e.target).closest('.contextMenuItem')!).dataset.index!)](e);
 		});
 
 		menu.addEventListener('click', (e) => {

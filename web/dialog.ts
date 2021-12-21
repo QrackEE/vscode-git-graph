@@ -80,6 +80,7 @@ export type DialogInputValue = string | string[] | boolean;
 export type DialogTarget = {
 	type: TargetType.Commit | TargetType.Ref | TargetType.CommitDetailsView;
 	elem: HTMLElement;
+	event?: Event;
 	hash: string;
 	ref?: string;
 } | RepoTarget;
@@ -87,7 +88,7 @@ export type DialogTarget = {
 /**
  * Implements the Git History View's dialogs.
  */
- export class Dialog {
+export class Dialog {
 	private elem: HTMLElement | null = null;
 	private target: DialogTarget | null = null;
 	private actioned: (() => void) | null = null;
@@ -354,7 +355,13 @@ export type DialogTarget = {
 			dialogContent.style.height = Math.round(0.8 * docHeight - 22) + 'px';
 			dialogHeight = Math.round(0.8 * docHeight);
 		}
-		dialog.style.top = Math.max(Math.round((docHeight - dialogHeight) / 2), 10) + 'px';
+		const event = (target as any)?.event;
+		if (event) {
+			dialog.style.top = (event.y-90) + 'px';
+			dialog.style.left = (event.x-50) + 'px';
+		} else {
+			dialog.style.top = Math.max(Math.round((docHeight - dialogHeight) / 2), 10) + 'px';
+		}
 		if (actionName !== null && actioned !== null) {
 			document.getElementById('dialogAction')!.addEventListener('click', actioned);
 			this.actioned = actioned;

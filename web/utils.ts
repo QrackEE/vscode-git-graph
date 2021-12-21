@@ -1,5 +1,6 @@
 import * as GG from "./types";
 import { contextMenu } from "./main";
+const dateFormat = require('date-format');
 
 /* Constants */
 export const VSCODE_API = acquireVsCodeApi();
@@ -64,7 +65,8 @@ export const HTML_UNESCAPES: { [key: string]: string } = { '&amp;': '&', '&lt;':
 export const HTML_ESCAPER_REGEX = /[&<>"'\/]/g;
 export const HTML_UNESCAPER_REGEX = /&lt;|&gt;|&amp;|&quot;|&#x27;|&#x2F;/g;
 
-export const ELLIPSIS = '&#8230;';
+// export const ELLIPSIS = '&#8230;';
+export const ELLIPSIS = '';
 export const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 export const UNCOMMITTED = '*';
 export const SHOW_ALL_BRANCHES = '';
@@ -304,9 +306,10 @@ export function formatShortDate(unixTimestamp: number) {
 		diff = Math.round(diff);
 		formatted = diff + ' ' + unit + (diff !== 1 ? 's' : '') + ' ago';
 	}
+	const title=dateFormat.asString( "yyyy-MM-dd hh:mm",date);
 	return {
-		title: dateStr + ' ' + hourMinsStr + ':' + pad2(date.getSeconds()),
-		formatted: formatted
+		title,
+		formatted: title
 	};
 }
 

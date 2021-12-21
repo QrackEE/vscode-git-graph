@@ -1122,19 +1122,40 @@ export class GitGraphView {
 		const commit = this.commits[this.commitLookup[hash]];
 		return [[
 			{
+				title: 'Copy Commit Hash',
+				visible: visibility.copyHash,
+				onClick: () => {
+					sendMessage({ command: 'copyToClipboard', type: 'Commit Hash', data: hash });
+				}
+			},
+			{
 				title: 'Add Tag' + ELLIPSIS,
 				visible: visibility.addTag,
-				onClick: () => this.addTagAction(hash, '', this.config.dialogDefaults.addTag.type, '', null, target)
+				onClick: (e) => {target.event=e;this.addTagAction(hash, '', this.config.dialogDefaults.addTag.type, '', null, target)}
 			}, {
 				title: 'Create Branch' + ELLIPSIS,
 				visible: visibility.createBranch,
-				onClick: () => this.createBranchAction(hash, '', this.config.dialogDefaults.createBranch.checkout, target)
+				onClick: (event) => { target.event = event; this.createBranchAction(hash, '', this.config.dialogDefaults.createBranch.checkout, target) }
+			}, {
+				title: 'Reset to this commit' + ELLIPSIS,
+				visible: visibility.reset,
+				onClick: (event) => {
+					target.event = event;
+					dialog.showSelect('Are you sure you want to reset ' + (this.gitBranchHead !== null ? '<b><i>' + escapeHtml(this.gitBranchHead) + '</i></b> (the current branch)' : 'the current branch') + ' to commit <b><i>' + abbrevCommit(hash) + '</i></b>?', this.config.dialogDefaults.resetCommit.mode, [
+						{ name: 'Soft - Keep all changes, but reset head', value: GG.GitResetMode.Soft },
+						{ name: 'Mixed - Keep working tree, but reset index', value: GG.GitResetMode.Mixed },
+						{ name: 'Hard - Discard all changes', value: GG.GitResetMode.Hard }
+					], 'Yes, reset', (mode) => {
+						runAction({ command: 'resetToCommit', repo: this.currentRepo, commit: hash, resetMode: <GG.GitResetMode>mode }, 'Resetting to Commit');
+					}, target);
+				}
 			}
 		], [
 			{
 				title: 'Checkout' + (globalState.alwaysAcceptCheckoutCommit ? '' : ELLIPSIS),
 				visible: visibility.checkout,
-				onClick: () => {
+				onClick: (event) => {
+					target.event=event;
 					const checkoutCommit = () => runAction({ command: 'checkoutCommit', repo: this.currentRepo, commitHash: hash }, 'Checking out Commit');
 					if (globalState.alwaysAcceptCheckoutCommit) {
 						checkoutCommit();
@@ -1150,7 +1171,8 @@ export class GitGraphView {
 			}, {
 				title: 'Cherry Pick' + ELLIPSIS,
 				visible: visibility.cherrypick,
-				onClick: () => {
+				onClick: (e) => {
+					target.event=e;
 					const isMerge = commit.parents.length > 1;
 					let inputs: DialogInput[] = [];
 					if (isMerge) {
@@ -1193,7 +1215,8 @@ export class GitGraphView {
 			}, {
 				title: 'Revert' + ELLIPSIS,
 				visible: visibility.revert,
-				onClick: () => {
+				onClick: (e) => {
+					target.event=e;
 					if (commit.parents.length > 1) {
 						let options = commit.parents.map((hash, index) => ({
 							name: abbrevCommit(hash) + (typeof this.commitLookup[hash] === 'number' ? ': ' + this.commits[this.commitLookup[hash]].message : ''),
@@ -1211,7 +1234,8 @@ export class GitGraphView {
 			}, {
 				title: 'Drop' + ELLIPSIS,
 				visible: visibility.drop && this.graph.dropCommitPossible(this.commitLookup[hash]),
-				onClick: () => {
+				onClick: (e) => {
+					target.event=e;
 					dialog.showConfirmation('Are you sure you want to permanently drop commit <b><i>' + abbrevCommit(hash) + '</i></b>?' + (this.onlyFollowFirstParent ? '<br/><i>Note: By enabling "Only follow the first parent of commits", some commits may have been hidden from the Git History View that could affect the outcome of performing this action.</i>' : ''), 'Yes, drop', () => {
 						runAction({ command: 'dropCommit', repo: this.currentRepo, commitHash: hash }, 'Dropping Commit');
 					}, target);
@@ -1226,27 +1250,8 @@ export class GitGraphView {
 				title: 'Rebase current branch on this Commit' + ELLIPSIS,
 				visible: visibility.rebase,
 				onClick: () => this.rebaseAction(hash, abbrevCommit(hash), GG.RebaseActionOn.Commit, target)
-			}, {
-				title: 'Reset current branch to this Commit' + ELLIPSIS,
-				visible: visibility.reset,
-				onClick: () => {
-					dialog.showSelect('Are you sure you want to reset ' + (this.gitBranchHead !== null ? '<b><i>' + escapeHtml(this.gitBranchHead) + '</i></b> (the current branch)' : 'the current branch') + ' to commit <b><i>' + abbrevCommit(hash) + '</i></b>?', this.config.dialogDefaults.resetCommit.mode, [
-						{ name: 'Soft - Keep all changes, but reset head', value: GG.GitResetMode.Soft },
-						{ name: 'Mixed - Keep working tree, but reset index', value: GG.GitResetMode.Mixed },
-						{ name: 'Hard - Discard all changes', value: GG.GitResetMode.Hard }
-					], 'Yes, reset', (mode) => {
-						runAction({ command: 'resetToCommit', repo: this.currentRepo, commit: hash, resetMode: <GG.GitResetMode>mode }, 'Resetting to Commit');
-					}, target);
-				}
 			}
 		], [
-			{
-				title: 'Copy Commit Hash to Clipboard',
-				visible: visibility.copyHash,
-				onClick: () => {
-					sendMessage({ command: 'copyToClipboard', type: 'Commit Hash', data: hash });
-				}
-			},
 			{
 				title: 'Copy Commit Subject to Clipboard',
 				visible: visibility.copySubject,
@@ -2017,7 +2022,7 @@ export class GitGraphView {
 	}
 
 	private observeViewScroll() {
-		let active = this.viewElem.scrollTop > 0, timeout:  any | null = null;
+		let active = this.viewElem.scrollTop > 0, timeout: any | null = null;
 		this.scrollShadowElem.className = active ? CLASS_ACTIVE : '';
 		this.viewElem.addEventListener('scroll', () => {
 			const scrollTop = this.viewElem.scrollTop;
@@ -3201,6 +3206,15 @@ let loaded = false;
 
 window.addEventListener('load', () => {
 	if (loaded) return;
+
+	function setContentHeight() {
+		const content = document.getElementById('content')
+		const height = window.outerHeight - 128;
+		content!.style.height = height + "px";
+	}
+	setContentHeight()
+	window.onresize = setContentHeight;
+
 	loaded = true;
 
 	TextFormatter.registerCustomEmojiMappings(initialState.config.customEmojiShortcodeMappings);

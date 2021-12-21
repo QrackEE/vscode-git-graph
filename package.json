@@ -1520,6 +1520,7 @@
 		"test-and-report-coverage": "jest --verbose --coverage"
 	},
 	"dependencies": {
+		"date-format": "^3.0.0",
 		"iconv-lite": "0.5.0"
 	},
 	"devDependencies": {
