@@ -799,7 +799,7 @@ body.tagLabelsRightAligned .gitRef.tag{
 	padding:4px 132px 4px 0;
 	border-bottom:1px solid rgba(128,128,128,0.5);
 	line-height:32px;
-	text-align:center;
+	/* text-align:center; */
 	font-weight:700;
 	font-size:13px;
 	-webkit-user-select:none;
@@ -828,8 +828,9 @@ body.tagLabelsRightAligned .gitRef.tag{
 	max-width:40vw;
 }
 
-#findBtn, #terminalBtn, #settingsBtn, #fetchBtn, #refreshBtn{
-	position:absolute;
+#openRemoteBtn,#findBtn, #terminalBtn, #settingsBtn, #fetchBtn, #refreshBtn{
+	position:relative;
+	display: inline-block;
 	top:50%;
 	width:20px;
 	height:20px;
@@ -837,23 +838,42 @@ body.tagLabelsRightAligned .gitRef.tag{
 	cursor:pointer;
 	-webkit-user-select:none;
 	user-select:none;
+	margin-left: 8px;
 }
-#findBtn{
-	right:100px;
+
+#openRemoteBtn{
+	text-decoration: none;
+    font-size: 18px;
+	color: var(--vscode-editor-foreground,#9FA1A3);
 }
-#terminalBtn{
-	right:70px;
+
+#findBtn, #settingsBtn{
+	position: absolute;
 }
-#settingsBtn{
-	right:40px;
-}
-#fetchBtn{
-	display:none;
-	right:40px;
-}
+
+/*
 #refreshBtn{
 	right:10px;
+} */
+
+
+#showRemoteBranchesControl{
+	display: none;
 }
+#controls.fetchSupported #findBtn{
+	right:10px;
+}
+/* #controls.fetchSupported #terminalBtn{
+	right:40px;
+} */
+#controls.fetchSupported #settingsBtn{
+	right:40px;
+}
+/* 
+#controls.fetchSupported #fetchBtn{
+	display:block;
+} */
+
 #refreshBtn.refreshing{
 	cursor:default;
 }
@@ -897,18 +917,6 @@ body.tagLabelsRightAligned .gitRef.tag{
 
 #controls.fetchSupported{
 	padding-right:162px;
-}
-#controls.fetchSupported #findBtn{
-	right:130px;
-}
-#controls.fetchSupported #terminalBtn{
-	right:100px;
-}
-#controls.fetchSupported #settingsBtn{
-	right:70px;
-}
-#controls.fetchSupported #fetchBtn{
-	display:block;
 }
 
 #controls input:focus{

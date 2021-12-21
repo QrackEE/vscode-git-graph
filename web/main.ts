@@ -172,6 +172,7 @@ export class GitGraphView {
 		fetchBtn.addEventListener('click', () => this.fetchFromRemotesAction());
 		findBtn.innerHTML = SVG_ICONS.search;
 		findBtn.addEventListener('click', () => this.findWidget.show(true));
+		this.checkRemote()
 		settingsBtn.innerHTML = SVG_ICONS.gear;
 		settingsBtn.addEventListener('click', () => this.settingsWidget.show(this.currentRepo));
 		terminalBtn.innerHTML = SVG_ICONS.terminal;
@@ -180,7 +181,7 @@ export class GitGraphView {
 				command: 'openTerminal',
 				repo: this.currentRepo,
 				name: this.gitRepos[this.currentRepo].name || getRepoName(this.currentRepo)
-			}, 'Opening Terminal');
+			});
 		});
 	}
 
@@ -510,6 +511,7 @@ export class GitGraphView {
 		this.currentRepoRefreshState.requestingConfig = false;
 		if (msg.config !== null && this.currentRepo === msg.repo) {
 			this.gitConfig = msg.config;
+			this.checkRemote()
 			this.saveState();
 
 			this.renderCdvExternalDiffBtn();
@@ -1695,6 +1697,18 @@ export class GitGraphView {
 
 	private deleteTagAction(refName: string, deleteOnRemote: string | null) {
 		runAction({ command: 'deleteTag', repo: this.currentRepo, tagName: refName, deleteOnRemote: deleteOnRemote }, 'Deleting Tag');
+	}
+
+	private checkRemote(){
+		const remoteHref=document.getElementById('openRemoteBtn') as HTMLLinkElement
+		const remotes=this?.gitConfig?.remotes;
+		if(remotes && remotes.length>0){
+			let url=remotes[0].url!;
+			if(url.startsWith("git@")){
+				url=url.replace(":","/").replace("git@","https://").replace(".git","")
+			}
+			remoteHref.href=url;
+		}
 	}
 
 	private fetchFromRemotesAction() {
@@ -3072,6 +3086,11 @@ export class GitGraphView {
 			contextMenu.show([
 				[
 					{
+						title: 'Open File',
+						visible: visibility.openFile && file.type !== GG.GitFileStatus.Deleted,
+						onClick: () => triggerOpenFile(file, fileElem)
+					},
+					{
 						title: 'View Diff',
 						visible: visibility.viewDiff && diffPossible,
 						onClick: () => triggerViewFileDiff(file, fileElem)
@@ -3085,11 +3104,6 @@ export class GitGraphView {
 						title: 'View Diff with Working File',
 						visible: visibility.viewDiffWithWorkingFile && fileExistsAtThisRevisionAndDiffPossible,
 						onClick: () => triggerViewFileDiffWithWorkingFile(file, fileElem)
-					},
-					{
-						title: 'Open File',
-						visible: visibility.openFile && file.type !== GG.GitFileStatus.Deleted,
-						onClick: () => triggerOpenFile(file, fileElem)
 					}
 				],
 				[
@@ -3944,8 +3958,9 @@ export function getRepoDropdownOptions(repos: Readonly<GG.GitRepoSet>) {
 	return options;
 }
 
-export function runAction(msg: GG.RequestMessage, action: string) {
-	dialog.showActionRunning(action);
+export function runAction(msg: GG.RequestMessage, action?: string) {
+	if(action)
+		dialog.showActionRunning(action);
 	sendMessage(msg);
 }
 

@@ -269,43 +269,7 @@ export function formatCommaSeparatedList(items: string[]) {
  * @returns The formatted date.
  */
 export function formatShortDate(unixTimestamp: number) {
-	const date = new Date(unixTimestamp * 1000), format = initialState.config.dateFormat;
-	let dateStr = format.iso
-		? date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate())
-		: date.getDate() + ' ' + MONTHS[date.getMonth()] + ' ' + date.getFullYear();
-	let hourMinsStr = pad2(date.getHours()) + ':' + pad2(date.getMinutes());
-	let formatted;
-
-	if (format.type === GG.DateFormatType.DateAndTime) {
-		formatted = dateStr + ' ' + hourMinsStr;
-	} else if (format.type === GG.DateFormatType.DateOnly) {
-		formatted = dateStr;
-	} else {
-		let diff = Math.round((new Date()).getTime() / 1000) - unixTimestamp, unit;
-		if (diff < 60) {
-			unit = 'second';
-		} else if (diff < 3600) {
-			unit = 'minute';
-			diff /= 60;
-		} else if (diff < 86400) {
-			unit = 'hour';
-			diff /= 3600;
-		} else if (diff < 604800) {
-			unit = 'day';
-			diff /= 86400;
-		} else if (diff < 2629800) {
-			unit = 'week';
-			diff /= 604800;
-		} else if (diff < 31557600) {
-			unit = 'month';
-			diff /= 2629800;
-		} else {
-			unit = 'year';
-			diff /= 31557600;
-		}
-		diff = Math.round(diff);
-		formatted = diff + ' ' + unit + (diff !== 1 ? 's' : '') + ' ago';
-	}
+	const date = new Date(unixTimestamp * 1000);
 	const title=dateFormat.asString( "yyyy-MM-dd hh:mm",date);
 	return {
 		title,
