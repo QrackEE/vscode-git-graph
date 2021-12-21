@@ -1512,14 +1512,11 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"vscode:uninstall": "node ./out/life-cycle/uninstall.js",
-		"clean": "node ./.vscode/clean.js",
-		"compile": "npm run lint && npm run clean && npm run compile-src && npm run compile-web",
-		"compile-src": "tsc -p ./src && node ./.vscode/package-src.js",
-		"compile-web": "tsc -p ./web && node ./.vscode/package-web.js",
-		"compile-web-debug": "tsc -p ./web && node ./.vscode/package-web.js debug",
+		"dev": "webpack --progress",
+		"build": "webpack --progress --mode=production",
 		"lint": "eslint -c .eslintrc.json --max-warnings 0 --ext .ts ./src ./tests ./web",
+		"vscode:prepublish": "npm run build",
+		"vscode:uninstall": "node ./out/life-cycle/uninstall.js",
 		"package": "vsce package",
 		"package-and-install": "npm run package && node ./.vscode/install-package.js",
 		"test": "jest --verbose",
@@ -1534,10 +1531,15 @@
 		"@types/vscode": "1.38.0",
 		"@typescript-eslint/eslint-plugin": "4.10.0",
 		"@typescript-eslint/parser": "4.10.0",
+		"css-loader": "^6.5.1",
 		"eslint": "7.15.0",
 		"jest": "26.6.3",
+		"mini-css-extract-plugin": "^2.4.5",
+		"style-loader": "^3.3.1",
 		"ts-jest": "26.4.4",
+		"ts-loader": "^7.0.5",
 		"typescript": "4.0.2",
-		"uglify-js": "3.10.0"
+		"webpack": "^5.65.0",
+		"webpack-cli": "^4.9.1"
 	}
 }

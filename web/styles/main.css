@@ -1,5 +1,9 @@
 /* Body */
-
+@import url(./contextMenu.css);
+@import url(./dialog.css);
+@import url(./dropdown.css);
+@import url(./findWidget.css);
+@import url(./settingsWidget.css);
 body{
 	display:block;
 	position:fixed;

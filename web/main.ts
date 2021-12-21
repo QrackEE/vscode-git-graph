@@ -1,4 +1,25 @@
-class GitGraphView {
+import * as GG from "./types"
+import { CLASS_CONTEXT_MENU_ACTIVE, ContextMenu, ContextMenuAction, ContextMenuActions, ContextMenuTarget } from "./contextMenu"
+import { Dialog, DialogInput, DialogInputType, DialogSelectInputOption, DialogTarget } from "./dialog"
+import { Dropdown, DropdownOption } from "./dropdown"
+import { FindWidget } from "./findWidget"
+import { Graph } from "./graph"
+import { SettingsWidget } from "./settingsWidget"
+import { CLASS_EXTERNAL_URL, CLASS_INTERNAL_URL, generateIssueLinkFromMatch, isExternalUrlElem, isInternalUrlElem, IssueLinking, isUrlElem, parseIssueLinkingConfig, TextFormatter } from "./textFormatter"
+import { alterClass, getRepoName, getSortedRepositoryPaths, showErrorMessage, arraysStrictlyEqual, sendMessage, arraysEqual, getCommitElems, escapeHtml, formatShortDate, formatLongDate, formatCommaSeparatedList, updateGlobalViewState, addListenerToClass, handledEvent, getVSCodeStyle, modifyColourOpacity, unescapeHtml, insertAfter, observeElemScroll, insertBeforeFirstChildWithClass, EventOverlay, getChildUl, CLASS_ACTIVE, CLASS_BRANCH_LABELS_ALIGNED_TO_GRAPH, CLASS_COMMIT_DETAILS_OPEN, CLASS_ENABLED, CLASS_FETCH_SUPPORTED, CLASS_PENDING_REVIEW, CLASS_REFRESHING, CLASS_REF_HEAD, CLASS_REF_REMOTE, CLASS_REF_STASH, CLASS_REF_TAG, CLASS_TAG_LABELS_RIGHT_ALIGNED, COLUMN_AUTO, COLUMN_HIDDEN, COLUMN_LEFT_RIGHT_PADDING, COLUMN_MIN_WIDTH, CSS_PROP_EDITOR_FONT_FAMILY, CSS_PROP_FIND_MATCH_HIGHLIGHT_BACKGROUND, CSS_PROP_FONT_FAMILY, CSS_PROP_LIMIT_GRAPH_WIDTH, CSS_PROP_SELECTION_BACKGROUND, ELLIPSIS, GIT_FILE_CHANGE_TYPES, GIT_SIGNATURE_STATUS_DESCRIPTIONS, SHOW_ALL_BRANCHES, SVG_ICONS, UNCOMMITTED, VSCODE_API, ImageResizer } from "./utils"
+
+require("./styles/main.css")
+// import  from "./contextMenu"
+require("./contextMenu")
+require("./dialog")
+require("./dropdown")
+require("./graph")
+require("./findWidget")
+require("./settingsWidget")
+require("./textFormatter")
+require("./utils")
+
+export class GitGraphView {
 	private gitRepos: GG.GitRepoSet;
 	private gitBranches: ReadonlyArray<string> = [];
 	private gitBranchHead: string | null = null;
@@ -1996,7 +2017,7 @@ class GitGraphView {
 	}
 
 	private observeViewScroll() {
-		let active = this.viewElem.scrollTop > 0, timeout: NodeJS.Timer | null = null;
+		let active = this.viewElem.scrollTop > 0, timeout:  any | null = null;
 		this.scrollShadowElem.className = active ? CLASS_ACTIVE : '';
 		this.viewElem.addEventListener('scroll', () => {
 			const scrollTop = this.viewElem.scrollTop;
@@ -3173,7 +3194,9 @@ class GitGraphView {
 
 /* Main */
 
-const contextMenu = new ContextMenu(), dialog = new Dialog(), eventOverlay = new EventOverlay();
+export const contextMenu = new ContextMenu();
+export const dialog = new Dialog();
+export const eventOverlay = new EventOverlay();
 let loaded = false;
 
 window.addEventListener('load', () => {
@@ -3525,13 +3548,13 @@ window.addEventListener('load', () => {
 
 /* File Tree Methods (for the Commit Details & Comparison Views) */
 
-function generateFileViewHtml(folder: FileTreeFolder, gitFiles: ReadonlyArray<GG.GitFileChange>, lastViewedFile: string | null, fileContextMenuOpen: number, type: GG.FileViewType, isUncommitted: boolean) {
+export function generateFileViewHtml(folder: FileTreeFolder, gitFiles: ReadonlyArray<GG.GitFileChange>, lastViewedFile: string | null, fileContextMenuOpen: number, type: GG.FileViewType, isUncommitted: boolean) {
 	return type === GG.FileViewType.List
 		? generateFileListHtml(folder, gitFiles, lastViewedFile, fileContextMenuOpen, isUncommitted)
 		: generateFileTreeHtml(folder, gitFiles, lastViewedFile, fileContextMenuOpen, isUncommitted, true);
 }
 
-function generateFileTreeHtml(folder: FileTreeFolder, gitFiles: ReadonlyArray<GG.GitFileChange>, lastViewedFile: string | null, fileContextMenuOpen: number, isUncommitted: boolean, topLevelFolder: boolean): string {
+export function generateFileTreeHtml(folder: FileTreeFolder, gitFiles: ReadonlyArray<GG.GitFileChange>, lastViewedFile: string | null, fileContextMenuOpen: number, isUncommitted: boolean, topLevelFolder: boolean): string {
 	const curFolderInfo = topLevelFolder || !initialState.config.commitDetailsView.fileTreeCompactFolders
 		? { folder: folder, name: folder.name, pathSeg: folder.name }
 		: getCurrentFolderInfo(folder, folder.name, folder.name);
@@ -3548,7 +3571,7 @@ function generateFileTreeHtml(folder: FileTreeFolder, gitFiles: ReadonlyArray<GG
 		(topLevelFolder ? '' : '</li>');
 }
 
-function getCurrentFolderInfo(folder: FileTreeFolder, name: string, pathSeg: string): { folder: FileTreeFolder, name: string, pathSeg: string } {
+export function getCurrentFolderInfo(folder: FileTreeFolder, name: string, pathSeg: string): { folder: FileTreeFolder, name: string, pathSeg: string } {
 	const keys = Object.keys(folder.contents);
 	let child: FileTreeNode;
 	return keys.length === 1 && (child = folder.contents[keys[0]]).type === 'folder'
@@ -3556,7 +3579,7 @@ function getCurrentFolderInfo(folder: FileTreeFolder, name: string, pathSeg: str
 		: { folder: folder, name: name, pathSeg: pathSeg };
 }
 
-function generateFileListHtml(folder: FileTreeFolder, gitFiles: ReadonlyArray<GG.GitFileChange>, lastViewedFile: string | null, fileContextMenuOpen: number, isUncommitted: boolean) {
+export function generateFileListHtml(folder: FileTreeFolder, gitFiles: ReadonlyArray<GG.GitFileChange>, lastViewedFile: string | null, fileContextMenuOpen: number, isUncommitted: boolean) {
 	const sortLeaves = (folder: FileTreeFolder, folderPath: string) => {
 		let keys = sortFolderKeys(folder);
 		let items: { relPath: string, leaf: FileTreeLeaf }[] = [];
@@ -3579,7 +3602,7 @@ function generateFileListHtml(folder: FileTreeFolder, gitFiles: ReadonlyArray<GG
 	return '<ul class="fileTreeFolderContents">' + html + '</ul>';
 }
 
-function generateFileTreeLeafHtml(name: string, leaf: FileTreeLeaf, gitFiles: ReadonlyArray<GG.GitFileChange>, lastViewedFile: string | null, fileContextMenuOpen: number, isUncommitted: boolean) {
+export function generateFileTreeLeafHtml(name: string, leaf: FileTreeLeaf, gitFiles: ReadonlyArray<GG.GitFileChange>, lastViewedFile: string | null, fileContextMenuOpen: number, isUncommitted: boolean) {
 	let encodedName = encodeURIComponent(name), escapedName = escapeHtml(name);
 	if (leaf.type === 'file') {
 		const fileTreeFile = gitFiles[leaf.index];
@@ -3601,7 +3624,7 @@ function generateFileTreeLeafHtml(name: string, leaf: FileTreeLeaf, gitFiles: Re
 	}
 }
 
-function alterFileTreeFolderOpen(folder: FileTreeFolder, folderPath: string, open: boolean) {
+export function alterFileTreeFolderOpen(folder: FileTreeFolder, folderPath: string, open: boolean) {
 	let path = folderPath.split('/'), i, cur = folder;
 	for (i = 0; i < path.length; i++) {
 		if (typeof cur.contents[path[i]] !== 'undefined') {
@@ -3613,7 +3636,7 @@ function alterFileTreeFolderOpen(folder: FileTreeFolder, folderPath: string, ope
 	}
 }
 
-function alterFileTreeFileReviewed(folder: FileTreeFolder, filePath: string, reviewed: boolean) {
+export function alterFileTreeFileReviewed(folder: FileTreeFolder, filePath: string, reviewed: boolean) {
 	let path = filePath.split('/'), i, cur = folder, folders = [folder];
 	for (i = 0; i < path.length; i++) {
 		if (typeof cur.contents[path[i]] !== 'undefined') {
@@ -3642,7 +3665,7 @@ function alterFileTreeFileReviewed(folder: FileTreeFolder, filePath: string, rev
 	}
 }
 
-function setFileTreeReviewed(folder: FileTreeFolder, reviewed: boolean) {
+export function setFileTreeReviewed(folder: FileTreeFolder, reviewed: boolean) {
 	folder.reviewed = reviewed;
 	let keys = Object.keys(folder.contents);
 	for (let i = 0; i < keys.length; i++) {
@@ -3655,7 +3678,7 @@ function setFileTreeReviewed(folder: FileTreeFolder, reviewed: boolean) {
 	}
 }
 
-function calcFileTreeFoldersReviewed(folder: FileTreeFolder) {
+export function calcFileTreeFoldersReviewed(folder: FileTreeFolder) {
 	const calc = (folder: FileTreeFolder) => {
 		let reviewed = true;
 		let keys = Object.keys(folder.contents);
@@ -3669,7 +3692,7 @@ function calcFileTreeFoldersReviewed(folder: FileTreeFolder) {
 	calc(folder);
 }
 
-function updateFileTreeHtml(elem: HTMLElement, folder: FileTreeFolder) {
+export function updateFileTreeHtml(elem: HTMLElement, folder: FileTreeFolder) {
 	let ul = getChildUl(elem);
 	if (ul === null) return;
 
@@ -3686,7 +3709,7 @@ function updateFileTreeHtml(elem: HTMLElement, folder: FileTreeFolder) {
 	}
 }
 
-function updateFileTreeHtmlFileReviewed(elem: HTMLElement, folder: FileTreeFolder, filePath: string) {
+export function updateFileTreeHtmlFileReviewed(elem: HTMLElement, folder: FileTreeFolder, filePath: string) {
 	let path = filePath;
 	const update = (elem: HTMLElement, folder: FileTreeFolder) => {
 		let ul = getChildUl(elem);
@@ -3711,7 +3734,7 @@ function updateFileTreeHtmlFileReviewed(elem: HTMLElement, folder: FileTreeFolde
 	update(elem, folder);
 }
 
-function getFilesInTree(folder: FileTreeFolder, gitFiles: ReadonlyArray<GG.GitFileChange>) {
+export function getFilesInTree(folder: FileTreeFolder, gitFiles: ReadonlyArray<GG.GitFileChange>) {
 	let files: string[] = [];
 	const scanFolder = (folder: FileTreeFolder) => {
 		let keys = Object.keys(folder.contents);
@@ -3728,13 +3751,13 @@ function getFilesInTree(folder: FileTreeFolder, gitFiles: ReadonlyArray<GG.GitFi
 	return files;
 }
 
-function sortFolderKeys(folder: FileTreeFolder) {
+export function sortFolderKeys(folder: FileTreeFolder) {
 	let keys = Object.keys(folder.contents);
 	keys.sort((a, b) => folder.contents[a].type !== 'file' && folder.contents[b].type === 'file' ? -1 : folder.contents[a].type === 'file' && folder.contents[b].type !== 'file' ? 1 : folder.contents[a].name.localeCompare(folder.contents[b].name));
 	return keys;
 }
 
-function getChildByPathSegment(folder: FileTreeFolder, pathSeg: string) {
+export function getChildByPathSegment(folder: FileTreeFolder, pathSeg: string) {
 	let cur: FileTreeNode = folder, comps = pathSeg.split('/');
 	for (let i = 0; i < comps.length; i++) {
 		cur = (<FileTreeFolder>cur).contents[comps[i]];
@@ -3745,7 +3768,7 @@ function getChildByPathSegment(folder: FileTreeFolder, pathSeg: string) {
 
 /* Repository State Helpers */
 
-function getCommitOrdering(repoValue: GG.RepoCommitOrdering): GG.CommitOrdering {
+export function getCommitOrdering(repoValue: GG.RepoCommitOrdering): GG.CommitOrdering {
 	switch (repoValue) {
 		case GG.RepoCommitOrdering.Default:
 			return initialState.config.commitOrdering;
@@ -3758,43 +3781,43 @@ function getCommitOrdering(repoValue: GG.RepoCommitOrdering): GG.CommitOrdering 
 	}
 }
 
-function getShowRemoteBranches(repoValue: GG.BooleanOverride) {
+export function getShowRemoteBranches(repoValue: GG.BooleanOverride) {
 	return repoValue === GG.BooleanOverride.Default
 		? initialState.config.showRemoteBranches
 		: repoValue === GG.BooleanOverride.Enabled;
 }
 
-function getShowStashes(repoValue: GG.BooleanOverride) {
+export function getShowStashes(repoValue: GG.BooleanOverride) {
 	return repoValue === GG.BooleanOverride.Default
 		? initialState.config.showStashes
 		: repoValue === GG.BooleanOverride.Enabled;
 }
 
-function getShowTags(repoValue: GG.BooleanOverride) {
+export function getShowTags(repoValue: GG.BooleanOverride) {
 	return repoValue === GG.BooleanOverride.Default
 		? initialState.config.showTags
 		: repoValue === GG.BooleanOverride.Enabled;
 }
 
-function getIncludeCommitsMentionedByReflogs(repoValue: GG.BooleanOverride) {
+export function getIncludeCommitsMentionedByReflogs(repoValue: GG.BooleanOverride) {
 	return repoValue === GG.BooleanOverride.Default
 		? initialState.config.includeCommitsMentionedByReflogs
 		: repoValue === GG.BooleanOverride.Enabled;
 }
 
-function getOnlyFollowFirstParent(repoValue: GG.BooleanOverride) {
+export function getOnlyFollowFirstParent(repoValue: GG.BooleanOverride) {
 	return repoValue === GG.BooleanOverride.Default
 		? initialState.config.onlyFollowFirstParent
 		: repoValue === GG.BooleanOverride.Enabled;
 }
 
-function getOnRepoLoadShowCheckedOutBranch(repoValue: GG.BooleanOverride) {
+export function getOnRepoLoadShowCheckedOutBranch(repoValue: GG.BooleanOverride) {
 	return repoValue === GG.BooleanOverride.Default
 		? initialState.config.onRepoLoad.showCheckedOutBranch
 		: repoValue === GG.BooleanOverride.Enabled;
 }
 
-function getOnRepoLoadShowSpecificBranches(repoValue: string[] | null) {
+export function getOnRepoLoadShowSpecificBranches(repoValue: string[] | null) {
 	return repoValue === null
 		? initialState.config.onRepoLoad.showSpecificBranches
 		: repoValue;
@@ -3803,7 +3826,7 @@ function getOnRepoLoadShowSpecificBranches(repoValue: string[] | null) {
 
 /* Miscellaneous Helper Methods */
 
-function haveFilesChanged(oldFiles: ReadonlyArray<GG.GitFileChange> | null, newFiles: ReadonlyArray<GG.GitFileChange> | null) {
+export function haveFilesChanged(oldFiles: ReadonlyArray<GG.GitFileChange> | null, newFiles: ReadonlyArray<GG.GitFileChange> | null) {
 	if ((oldFiles === null) !== (newFiles === null)) {
 		return true;
 	} else if (oldFiles === null && newFiles === null) {
@@ -3813,11 +3836,11 @@ function haveFilesChanged(oldFiles: ReadonlyArray<GG.GitFileChange> | null, newF
 	}
 }
 
-function abbrevCommit(commitHash: string) {
+export function abbrevCommit(commitHash: string) {
 	return commitHash.substring(0, 8);
 }
 
-function getRepoDropdownOptions(repos: Readonly<GG.GitRepoSet>) {
+export function getRepoDropdownOptions(repos: Readonly<GG.GitRepoSet>) {
 	const repoPaths = getSortedRepositoryPaths(repos, initialState.config.repoDropdownOrder);
 	const paths: string[] = [], names: string[] = [], distinctNames: string[] = [], firstSep: number[] = [];
 	const resolveAmbiguous = (indexes: number[]) => {
@@ -3907,12 +3930,12 @@ function getRepoDropdownOptions(repos: Readonly<GG.GitRepoSet>) {
 	return options;
 }
 
-function runAction(msg: GG.RequestMessage, action: string) {
+export function runAction(msg: GG.RequestMessage, action: string) {
 	dialog.showActionRunning(action);
 	sendMessage(msg);
 }
 
-function getBranchLabels(heads: ReadonlyArray<string>, remotes: ReadonlyArray<GG.GitCommitRemote>) {
+export function getBranchLabels(heads: ReadonlyArray<string>, remotes: ReadonlyArray<GG.GitCommitRemote>) {
 	let headLabels: { name: string; remotes: string[] }[] = [], headLookup: { [name: string]: number } = {}, remoteLabels: ReadonlyArray<GG.GitCommitRemote>;
 	for (let i = 0; i < heads.length; i++) {
 		headLabels.push({ name: heads[i], remotes: [] });
@@ -3937,7 +3960,7 @@ function getBranchLabels(heads: ReadonlyArray<string>, remotes: ReadonlyArray<GG
 	return { heads: headLabels, remotes: remoteLabels };
 }
 
-function findCommitElemWithId(elems: HTMLCollectionOf<HTMLElement>, id: number | null) {
+export function findCommitElemWithId(elems: HTMLCollectionOf<HTMLElement>, id: number | null) {
 	if (id === null) return null;
 	let findIdStr = id.toString();
 	for (let i = 0; i < elems.length; i++) {
@@ -3946,7 +3969,7 @@ function findCommitElemWithId(elems: HTMLCollectionOf<HTMLElement>, id: number |
 	return null;
 }
 
-function generateSignatureHtml(signature: GG.GitSignature) {
+export function generateSignatureHtml(signature: GG.GitSignature) {
 	return '<span class="signatureInfo ' + signature.status + '" title="' + GIT_SIGNATURE_STATUS_DESCRIPTIONS[signature.status] + ':'
 		+ ' Signed by ' + escapeHtml(signature.signer !== '' ? signature.signer : '<Unknown>')
 		+ ' (GPG Key Id: ' + escapeHtml(signature.key !== '' ? signature.key : '<Unknown>') + ')">'
@@ -3958,7 +3981,7 @@ function generateSignatureHtml(signature: GG.GitSignature) {
 		+ '</span>';
 }
 
-function closeDialogAndContextMenu() {
+export function closeDialogAndContextMenu() {
 	if (dialog.isOpen()) dialog.close();
 	if (contextMenu.isOpen()) contextMenu.close();
 }

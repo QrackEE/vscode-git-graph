@@ -1,4 +1,6 @@
-interface DropdownOption {
+import { alterClass, formatCommaSeparatedList, escapeHtml, CLASS_SELECTED, SVG_ICONS } from "./utils";
+
+export interface DropdownOption {
 	readonly name: string;
 	readonly value: string;
 	readonly hint?: string;
@@ -7,7 +9,7 @@ interface DropdownOption {
 /**
  * Implements the dropdown inputs used in the Git Graph View's top control bar.
  */
-class Dropdown {
+ export class Dropdown {
 	private readonly showInfo: boolean;
 	private readonly multipleAllowed: boolean;
 	private readonly changeCallback: (values: string[]) => void;
@@ -17,7 +19,7 @@ class Dropdown {
 	private lastSelected: number = 0; // Only used when multipleAllowed === false
 	private dropdownVisible: boolean = false;
 	private lastClicked: number = 0;
-	private doubleClickTimeout: NodeJS.Timer | null = null;
+	private doubleClickTimeout: any | null = null;
 
 	private readonly elem: HTMLElement;
 	private readonly currentValueElem: HTMLDivElement;

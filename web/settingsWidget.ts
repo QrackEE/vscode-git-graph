@@ -1,4 +1,9 @@
-interface SettingsWidgetState {
+import * as GG from "./types";
+import { DialogInput, DialogInputType, DialogInputValue } from "./dialog";
+import { dialog, getIncludeCommitsMentionedByReflogs, getOnlyFollowFirstParent, getOnRepoLoadShowCheckedOutBranch, getOnRepoLoadShowSpecificBranches, getShowStashes, getShowTags, GitGraphView, runAction } from "./main";
+import { observeElemScroll, alterClass, escapeHtml, getRepoName, formatCommaSeparatedList, arraysStrictlyEqualIgnoringOrder, addListenerToClass, sendMessage, updateGlobalViewState, CLASS_ACTIVE, CLASS_LOADING, CLASS_TRANSITION, ELLIPSIS, SVG_ICONS } from "./utils";
+
+export interface SettingsWidgetState {
 	readonly currentRepo: string | null;
 	readonly scrollTop: number;
 }
@@ -6,7 +11,7 @@ interface SettingsWidgetState {
 /**
  * Implements the Git Graph View's Settings Widget.
  */
-class SettingsWidget {
+ export class SettingsWidget {
 	private readonly view: GitGraphView;
 
 	private currentRepo: string | null = null;
@@ -602,7 +607,7 @@ class SettingsWidget {
 				} else if (new RegExp(issueRegex, 'gu')) {
 					regExpParseError = null;
 				}
-			} catch (e) {
+			} catch (e:any) {
 				regExpParseError = e.message;
 			}
 			if (regExpParseError !== null) {

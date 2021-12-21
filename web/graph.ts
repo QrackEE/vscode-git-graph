@@ -1,3 +1,7 @@
+import * as GG from "./types";
+import { findCommitElemWithId, closeDialogAndContextMenu, abbrevCommit, getBranchLabels } from "./main";
+import { SVG_NAMESPACE, UNCOMMITTED, getCommitElems, ELLIPSIS, escapeHtml } from "./utils";
+
 const CLASS_GRAPH_VERTEX_ACTIVE = 'graphVertexActive';
 const NULL_VERTEX_ID = -1;
 
@@ -35,7 +39,7 @@ type VertexOrNull = Vertex | null;
 
 /* Branch Class */
 
-class Branch {
+export class Branch {
 	private readonly colour: number;
 	private end: number = 0;
 	private lines: Line[] = [];
@@ -334,7 +338,7 @@ class Vertex {
 
 /* Graph Class */
 
-class Graph {
+export class Graph {
 	private readonly config: GG.GraphConfig;
 	private readonly muteConfig: GG.MuteCommitsConfig;
 	private vertices: Vertex[] = [];
@@ -358,7 +362,7 @@ class Graph {
 
 	private tooltipId: number = -1;
 	private tooltipElem: HTMLElement | null = null;
-	private tooltipTimeout: NodeJS.Timer | null = null;
+	private tooltipTimeout:  any | null = null;
 	private tooltipVertex: HTMLElement | null = null;
 
 	constructor(id: string, viewElem: HTMLElement, config: GG.GraphConfig, muteConfig: GG.MuteCommitsConfig) {

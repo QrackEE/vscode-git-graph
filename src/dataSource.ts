@@ -1527,6 +1527,9 @@ export class DataSource extends Disposable {
 			args.push('HEAD');
 		}
 		args.push('--');
+		// if(1==1){
+		// 	args.push("--follow","package.json")
+		// }
 
 		return this.spawnGit(args, repo, (stdout) => {
 			let lines = stdout.split(EOL_REGEX);

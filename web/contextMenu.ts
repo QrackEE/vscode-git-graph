@@ -1,15 +1,18 @@
-const CLASS_CONTEXT_MENU_ACTIVE = 'contextMenuActive';
+import { findCommitElemWithId } from "./main";
+import { SVG_ICONS, addListenerToClass, alterClass, alterClassOfCollection, getCommitElems } from "./utils";
 
-interface ContextMenuAction {
+export const CLASS_CONTEXT_MENU_ACTIVE = 'contextMenuActive';
+
+export interface ContextMenuAction {
 	readonly title: string;
 	readonly visible: boolean;
 	readonly onClick: () => void;
 	readonly checked?: boolean; // Required in checked context menus
 }
 
-type ContextMenuActions = ReadonlyArray<ReadonlyArray<ContextMenuAction>>;
+export type ContextMenuActions = ReadonlyArray<ReadonlyArray<ContextMenuAction>>;
 
-type ContextMenuTarget = {
+export type ContextMenuTarget = {
 	type: TargetType.Commit | TargetType.Ref | TargetType.CommitDetailsView;
 	elem: HTMLElement;
 	hash: string;
@@ -20,7 +23,7 @@ type ContextMenuTarget = {
 /**
  * Implements the Git Graph View's context menus.
  */
-class ContextMenu {
+export class ContextMenu {
 	private elem: HTMLElement | null = null;
 	private onClose: (() => void) | null = null;
 	private target: ContextMenuTarget | null = null;

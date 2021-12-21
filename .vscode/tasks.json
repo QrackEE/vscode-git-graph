@@ -9,49 +9,35 @@
     },
     "tasks": [
         {
+            "label": "webpack-dev",
             "type": "npm",
-            "script": "compile",
-            "label": "Compile"
-        },
-        {
-            "type": "npm",
-            "script": "compile-src",
-            "label": "Compile (Back-End Only)"
-        },
-        {
-            "type": "npm",
-            "script": "compile-web",
-            "label": "Compile (Front-End Only)"
-        },
-        {
-            "type": "npm",
-            "script": "compile-web-debug",
-            "label": "Compile (Front-End Only) - Debug"
-        },
-        {
-            "type": "npm",
-            "script": "lint",
-            "label": "Lint"
-        },
-        {
-            "type": "npm",
-            "script": "package",
-            "label": "Package VSIX"
-        },
-        {
-            "type": "npm",
-            "script": "package-and-install",
-            "label": "Package VSIX (Install on Completion)"
-        },
-        {
-            "type": "npm",
-            "script": "test",
-            "label": "Run Unit Tests"
-        },
-        {
-            "type": "npm",
-            "script": "test-and-report-coverage",
-            "label": "Run Unit Tests (Report Code Coverage)"
+            "script": "dev",
+            "isBackground": true,
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                {
+                    "pattern": [
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": {
+                            "regexp": "webpack --progress"
+                        },
+                        "endsPattern": {
+                            "regexp": "compiled successfully"
+                        }
+                    }
+                }
+            ]
         }
     ]
 }

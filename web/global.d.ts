@@ -1,4 +1,6 @@
-import * as GG from '../out/types'; // Import types from back-end (requires `npm run compile-src`)
+import { FindWidgetState } from './findWidget';
+import { SettingsWidgetState } from './settingsWidget';
+import * as GG from './types'; // Import types from back-end (requires `npm run compile-src`)
 
 declare global {
 
