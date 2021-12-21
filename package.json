@@ -48,6 +48,16 @@
 				"icon": "$(history)"
 			},
 			{
+				"command": "git-graph.viewFileHistory",
+				"title": "Git: View File History",
+				"icon": "$(history)"
+			},
+			{
+				"command": "git-graph.quickSync",
+				"title": "Quick sync repository.",
+				"icon": "$(activate-breakpoints)"
+			},
+			{
 				"category": "Git History",
 				"command": "git-graph.addGitRepository",
 				"title": "Add Git Repository..."
@@ -1480,6 +1490,16 @@
 				}
 			}
 		},
+		"keybindings": [
+			{
+				"command": "git-graph.quickSync",
+				"key": "ctrl+alt+p"
+			},
+			{
+				"command": "git-graph.viewFileHistory",
+				"key": "alt+h"
+			}
+		],
 		"menus": {
 			"commandPalette": [
 				{
@@ -1501,9 +1521,34 @@
 					"group": "navigation"
 				},
 				{
+					"command": "git-graph.quickSync",
+					"group": "navigation@-100",
+					"when": "gitOpenRepositoryCount != 0"
+				},
+				{
 					"when": "scmProvider == git && config.git-graph.sourceCodeProviderIntegrationLocation == 'More Actions'",
 					"command": "git-graph.view",
 					"group": "inline"
+				}
+			],
+			"scm/resourceState/context": [
+				{
+					"command": "git-graph.viewFileHistory",
+					"when": "config.git.enabled && gitOpenRepositoryCount != 0"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "git-graph.viewFileHistory",
+					"group": "git",
+					"when": "config.git.enabled && gitOpenRepositoryCount != 0"
+				}
+			],
+			"editor/context": [
+				{
+					"command": "git-graph.viewFileHistory",
+					"group": "git",
+					"when": "config.git.enabled && gitOpenRepositoryCount != 0"
 				}
 			]
 		}
