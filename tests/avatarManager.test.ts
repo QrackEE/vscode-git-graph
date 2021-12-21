@@ -843,7 +843,7 @@ describe('AvatarManager', () => {
 				}]);
 				await waitForExpect(() => {
 					expect(spyOnLog).toHaveBeenCalledWith('Saved Avatar for user4@*****');
-					expect(spyOnLog).toHaveBeenCalledWith('Sent Avatar for user4@***** to the Git Graph View');
+					expect(spyOnLog).toHaveBeenCalledWith('Sent Avatar for user4@***** to the Git History View');
 				});
 				expect(spyOnGetRemoteUrl).toHaveBeenCalledWith('test-repo', 'test-remote');
 				expect(spyOnHttpsGet).toHaveBeenCalledWith({
@@ -1437,7 +1437,7 @@ describe('AvatarManager', () => {
 			});
 		});
 
-		it('Should fetch a new avatar, but not send it to the Git Graph View', async () => {
+		it('Should fetch a new avatar, but not send it to the Git History View', async () => {
 			// Setup
 			spyOnGetRemoteUrl.mockResolvedValueOnce(null);
 			mockHttpsResponse(200, 'binary-image-data');
@@ -1451,7 +1451,7 @@ describe('AvatarManager', () => {
 			// Assert
 			await waitForExpect(() => {
 				expect(spyOnLog).toHaveBeenCalledWith('Saved Avatar for user4@*****');
-				expect(spyOnLog).toHaveBeenCalledWith('Failed to Send Avatar for user4@***** to the Git Graph View');
+				expect(spyOnLog).toHaveBeenCalledWith('Failed to Send Avatar for user4@***** to the Git History View');
 			});
 			expect(spyOnGetRemoteUrl).toHaveBeenCalledWith('test-repo', 'test-remote');
 			expect(spyOnHttpsGet).toHaveBeenCalledWith({
@@ -1469,7 +1469,7 @@ describe('AvatarManager', () => {
 			});
 		});
 
-		it('Should fetch a new avatar, and log when it fails to send it to the Git Graph View', async () => {
+		it('Should fetch a new avatar, and log when it fails to send it to the Git History View', async () => {
 			// Setup
 			spyOnGetRemoteUrl.mockResolvedValueOnce(null);
 			mockHttpsResponse(200, 'binary-image-data');
@@ -1481,7 +1481,7 @@ describe('AvatarManager', () => {
 			// Assert
 			await waitForExpect(() => {
 				expect(spyOnLog).toHaveBeenCalledWith('Saved Avatar for user4@*****');
-				expect(spyOnLog).toHaveBeenCalledWith('Avatar for user4@***** is ready to be used the next time the Git Graph View is opened');
+				expect(spyOnLog).toHaveBeenCalledWith('Avatar for user4@***** is ready to be used the next time the Git History View is opened');
 			});
 			expect(spyOnGetRemoteUrl).toHaveBeenCalledWith('test-repo', 'test-remote');
 			expect(spyOnHttpsGet).toHaveBeenCalledWith({
@@ -1647,7 +1647,7 @@ describe('AvatarManager', () => {
 
 		it('Should return the error message returned by ExtensionState.clearAvatarCache', async () => {
 			// Setup
-			const errorMessage = 'Visual Studio Code was unable to save the Git Graph Global State Memento.';
+			const errorMessage = 'Visual Studio Code was unable to save the Git History Global State Memento.';
 			spyOnClearAvatarCache.mockResolvedValueOnce(errorMessage);
 
 			// Run

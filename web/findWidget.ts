@@ -11,7 +11,7 @@ export interface FindWidgetState {
 }
 
 /**
- * Implements the Git Graph View's Find Widget.
+ * Implements the Git History View's Find Widget.
  */
 export class FindWidget {
 	private readonly view: GitGraphView;
@@ -30,7 +30,7 @@ export class FindWidget {
 
 	/**
 	 * Construct a new FindWidget instance.
-	 * @param view The Git Graph View that the FindWidget is for.
+	 * @param view The Git History View that the FindWidget is for.
 	 * @returns The FindWidget instance.
 	 */
 	constructor(view: GitGraphView) {

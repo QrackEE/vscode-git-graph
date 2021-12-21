@@ -7,7 +7,7 @@ export interface DropdownOption {
 }
 
 /**
- * Implements the dropdown inputs used in the Git Graph View's top control bar.
+ * Implements the dropdown inputs used in the Git History View's top control bar.
  */
  export class Dropdown {
 	private readonly showInfo: boolean;

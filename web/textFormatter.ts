@@ -100,7 +100,7 @@ namespace TF {
 }
 
 /**
- * Parses text, and produces formatted HTML for the Git Graph View.
+ * Parses text, and produces formatted HTML for the Git History View.
  */
 export class TextFormatter {
 	private readonly config: Readonly<{
@@ -128,7 +128,7 @@ export class TextFormatter {
 
 	/**
 	 * Construct a TextFormatter instance.
-	 * @param commits The array of commits currently loaded in the Git Graph View.
+	 * @param commits The array of commits currently loaded in the Git History View.
 	 * @param repoIssueLinkingConfig The Issue Linking Configuration of the current repository.
 	 * @param config The configuration of the TextFormatter, to determine which types of formatting should be performed.
 	 * @returns The TextFormatter instance.

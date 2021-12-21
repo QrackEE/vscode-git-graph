@@ -175,7 +175,7 @@ describe('CommandManager', () => {
 	});
 
 	describe('git-graph.view', () => {
-		it('Should open the Git Graph View', async () => {
+		it('Should open the Git History View', async () => {
 			// Setup
 			vscode.mockExtensionSettingReturnValue('openToTheRepoOfTheActiveTextEditorDocument', false);
 
@@ -189,7 +189,7 @@ describe('CommandManager', () => {
 			});
 		});
 
-		it('Should open the Git Graph View to the known repository', async () => {
+		it('Should open the Git History View to the known repository', async () => {
 			// Setup
 			spyOnGetKnownRepo.mockResolvedValueOnce('/path/to/workspace-folder/repo');
 			vscode.mockExtensionSettingReturnValue('openToTheRepoOfTheActiveTextEditorDocument', false);
@@ -204,7 +204,7 @@ describe('CommandManager', () => {
 			});
 		});
 
-		it('Should open the Git Graph View to a newly registered repository', async () => {
+		it('Should open the Git History View to a newly registered repository', async () => {
 			// Setup
 			spyOnGetKnownRepo.mockResolvedValueOnce(null);
 			spyOnRegisterRepo.mockResolvedValueOnce({ root: '/path/to/workspace-folder/repo', error: null });
@@ -220,7 +220,7 @@ describe('CommandManager', () => {
 			});
 		});
 
-		it('Should open the Git Graph View to the repository containing the active text editor', async () => {
+		it('Should open the Git History View to the repository containing the active text editor', async () => {
 			// Setup
 			vscode.window.activeTextEditor = { document: { uri: vscode.Uri.file('/path/to/workspace-folder/active-file.txt') } };
 			vscode.mockExtensionSettingReturnValue('openToTheRepoOfTheActiveTextEditorDocument', true);
@@ -259,7 +259,7 @@ describe('CommandManager', () => {
 				expect(vscode.window.showOpenDialog).toHaveBeenCalledWith({ canSelectFiles: false, canSelectFolders: true, canSelectMany: false });
 				expect(spyOnIsPathInWorkspace).toHaveBeenCalledWith('/path/to/workspace-folder/repo');
 				expect(spyOnRegisterRepo).toHaveBeenCalledWith('/path/to/workspace-folder/repo', false);
-				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('The repository "/path/to/workspace-folder/repo" was added to Git Graph.');
+				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('The repository "/path/to/workspace-folder/repo" was added to Git History.');
 			});
 		});
 
@@ -279,7 +279,7 @@ describe('CommandManager', () => {
 				expect(vscode.window.showOpenDialog).toHaveBeenCalledWith({ canSelectFiles: false, canSelectFolders: true, canSelectMany: false });
 				expect(spyOnIsPathInWorkspace).toHaveBeenCalledWith('/path/to/workspace-folder/repo');
 				expect(spyOnRegisterRepo).toHaveBeenCalledWith('/path/to/workspace-folder/repo', false);
-				expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('The folder "/path/to/workspace-folder/repo" is not a Git repository. Therefore it could not be added to Git Graph.');
+				expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('The folder "/path/to/workspace-folder/repo" is not a Git repository. Therefore it could not be added to Git History.');
 			});
 		});
 
@@ -297,7 +297,7 @@ describe('CommandManager', () => {
 				expect(spyOnLog).toHaveBeenCalledWith('Command Invoked: git-graph.addGitRepository');
 				expect(vscode.window.showOpenDialog).toHaveBeenCalledWith({ canSelectFiles: false, canSelectFolders: true, canSelectMany: false });
 				expect(spyOnIsPathInWorkspace).toHaveBeenCalledWith('/path/to/non-workspace-folder/repo');
-				expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('The folder "/path/to/non-workspace-folder/repo" is not within the opened Visual Studio Code workspace, and therefore could not be added to Git Graph.');
+				expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('The folder "/path/to/non-workspace-folder/repo" is not within the opened Visual Studio Code workspace, and therefore could not be added to Git History.');
 				expect(spyOnRegisterRepo).not.toHaveBeenCalled();
 			});
 		});
@@ -388,11 +388,11 @@ describe('CommandManager', () => {
 						}
 					],
 					{
-						placeHolder: 'Select a repository to remove from Git Graph:',
+						placeHolder: 'Select a repository to remove from Git History:',
 						canPickMany: false
 					}
 				);
-				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('The repository "repo1" was removed from Git Graph.');
+				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('The repository "repo1" was removed from Git History.');
 			});
 		});
 
@@ -427,11 +427,11 @@ describe('CommandManager', () => {
 						}
 					],
 					{
-						placeHolder: 'Select a repository to remove from Git Graph:',
+						placeHolder: 'Select a repository to remove from Git History:',
 						canPickMany: false
 					}
 				);
-				expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('The repository "repo1" is not known to Git Graph.');
+				expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('The repository "repo1" is not known to Git History.');
 			});
 		});
 
@@ -461,7 +461,7 @@ describe('CommandManager', () => {
 						}
 					],
 					{
-						placeHolder: 'Select a repository to remove from Git Graph:',
+						placeHolder: 'Select a repository to remove from Git History:',
 						canPickMany: false
 					}
 				);
@@ -495,7 +495,7 @@ describe('CommandManager', () => {
 						}
 					],
 					{
-						placeHolder: 'Select a repository to remove from Git Graph:',
+						placeHolder: 'Select a repository to remove from Git History:',
 						canPickMany: false
 					}
 				);
@@ -542,7 +542,7 @@ describe('CommandManager', () => {
 
 		it('Should display the error message returned by AvatarManager.clearCache', async () => {
 			// Setup
-			const errorMessage = 'Visual Studio Code was unable to save the Git Graph Global State Memento.';
+			const errorMessage = 'Visual Studio Code was unable to save the Git History Global State Memento.';
 			spyOnClearCache.mockResolvedValueOnce(errorMessage);
 			vscode.window.showErrorMessage.mockResolvedValueOnce(null);
 
@@ -580,7 +580,7 @@ describe('CommandManager', () => {
 			spyOnGetLastActiveRepo = jest.spyOn(extensionState, 'getLastActiveRepo');
 		});
 
-		it('Should display a quick pick to select a repository to open in the Git Graph View (with last active repository first)', async () => {
+		it('Should display a quick pick to select a repository to open in the Git History View (with last active repository first)', async () => {
 			// Setup
 			const repos = {
 				'/path/to/repo3': mockRepoState({ name: null, workspaceFolderIndex: 2 }),
@@ -618,7 +618,7 @@ describe('CommandManager', () => {
 						}
 					],
 					{
-						placeHolder: 'Select the repository you want to open in Git Graph, and fetch from remote(s):',
+						placeHolder: 'Select the repository you want to open in Git History, and fetch from remote(s):',
 						canPickMany: false
 					}
 				);
@@ -626,7 +626,7 @@ describe('CommandManager', () => {
 			});
 		});
 
-		it('Should display a quick pick to select a repository to open in the Git Graph View (no last active repository)', async () => {
+		it('Should display a quick pick to select a repository to open in the Git History View (no last active repository)', async () => {
 			// Setup
 			spyOnGetRepos.mockReturnValueOnce({
 				'/path/to/repo1': mockRepoState({ name: null, workspaceFolderIndex: 0 }),
@@ -656,7 +656,7 @@ describe('CommandManager', () => {
 						}
 					],
 					{
-						placeHolder: 'Select the repository you want to open in Git Graph, and fetch from remote(s):',
+						placeHolder: 'Select the repository you want to open in Git History, and fetch from remote(s):',
 						canPickMany: false
 					}
 				);
@@ -664,7 +664,7 @@ describe('CommandManager', () => {
 			});
 		});
 
-		it('Should display a quick pick to select a repository to open in the Git Graph View (last active repository is unknown)', async () => {
+		it('Should display a quick pick to select a repository to open in the Git History View (last active repository is unknown)', async () => {
 			// Setup
 			spyOnGetRepos.mockReturnValueOnce({
 				'/path/to/repo1': mockRepoState({ name: null, workspaceFolderIndex: 0 }),
@@ -694,7 +694,7 @@ describe('CommandManager', () => {
 						}
 					],
 					{
-						placeHolder: 'Select the repository you want to open in Git Graph, and fetch from remote(s):',
+						placeHolder: 'Select the repository you want to open in Git History, and fetch from remote(s):',
 						canPickMany: false
 					}
 				);
@@ -702,7 +702,7 @@ describe('CommandManager', () => {
 			});
 		});
 
-		it('Shouldn\'t open the Git Graph View when no item is selected in the quick pick', async () => {
+		it('Shouldn\'t open the Git History View when no item is selected in the quick pick', async () => {
 			// Setup
 			spyOnGetRepos.mockReturnValueOnce({
 				'/path/to/repo1': mockRepoState({ name: null, workspaceFolderIndex: 0 }),
@@ -729,7 +729,7 @@ describe('CommandManager', () => {
 						}
 					],
 					{
-						placeHolder: 'Select the repository you want to open in Git Graph, and fetch from remote(s):',
+						placeHolder: 'Select the repository you want to open in Git History, and fetch from remote(s):',
 						canPickMany: false
 					}
 				);
@@ -765,7 +765,7 @@ describe('CommandManager', () => {
 						}
 					],
 					{
-						placeHolder: 'Select the repository you want to open in Git Graph, and fetch from remote(s):',
+						placeHolder: 'Select the repository you want to open in Git History, and fetch from remote(s):',
 						canPickMany: false
 					}
 				);
@@ -774,7 +774,7 @@ describe('CommandManager', () => {
 			});
 		});
 
-		it('Should open the Git Graph View immediately when there is only one repository', async () => {
+		it('Should open the Git History View immediately when there is only one repository', async () => {
 			// Setup
 			spyOnGetRepos.mockReturnValueOnce({
 				'/path/to/repo1': mockRepoState({ name: null, workspaceFolderIndex: 0 })
@@ -790,7 +790,7 @@ describe('CommandManager', () => {
 			});
 		});
 
-		it('Should open the Git Graph View immediately when there are no repositories', async () => {
+		it('Should open the Git History View immediately when there are no repositories', async () => {
 			// Setup
 			spyOnGetRepos.mockReturnValueOnce({});
 
@@ -954,7 +954,7 @@ describe('CommandManager', () => {
 			});
 			spyOnGetCommitSubject.mockResolvedValueOnce('Commit Subject');
 			vscode.window.showQuickPick.mockImplementationOnce((items: Promise<any[]>, _: any) => items.then((items) => items[0]));
-			spyOnEndCodeReview.mockResolvedValueOnce('Visual Studio Code was unable to save the Git Graph Workspace State Memento.');
+			spyOnEndCodeReview.mockResolvedValueOnce('Visual Studio Code was unable to save the Git History Workspace State Memento.');
 			vscode.window.showErrorMessage.mockResolvedValueOnce(null);
 
 			// Run
@@ -963,7 +963,7 @@ describe('CommandManager', () => {
 			// Assert
 			await waitForExpect(() => {
 				expect(spyOnLog).toHaveBeenCalledWith('Command Invoked: git-graph.endSpecificWorkspaceCodeReview');
-				expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('Visual Studio Code was unable to save the Git Graph Workspace State Memento.');
+				expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('Visual Studio Code was unable to save the Git History Workspace State Memento.');
 			});
 		});
 
@@ -997,7 +997,7 @@ describe('CommandManager', () => {
 	});
 
 	describe('git-graph.resumeWorkspaceCodeReview', () => {
-		it('Should load the selected code review in the Git Graph View (single commit)', async () => {
+		it('Should load the selected code review in the Git History View (single commit)', async () => {
 			// Setup
 			spyOnGetCodeReviews.mockReturnValueOnce({
 				'/path/to/repo': {
@@ -1066,7 +1066,7 @@ describe('CommandManager', () => {
 			});
 		});
 
-		it('Should load the selected code review in the Git Graph View (commit comparison)', async () => {
+		it('Should load the selected code review in the Git History View (commit comparison)', async () => {
 			// Setup
 			spyOnGetCodeReviews.mockReturnValueOnce({
 				'/path/to/repo': {
@@ -1113,7 +1113,7 @@ describe('CommandManager', () => {
 			});
 		});
 
-		it('Shouldn\'t load the the Git Graph View if no code review was selected', async () => {
+		it('Shouldn\'t load the the Git History View if no code review was selected', async () => {
 			// Setup
 			spyOnGetCodeReviews.mockReturnValueOnce({
 				'/path/to/repo': {
@@ -1209,8 +1209,8 @@ describe('CommandManager', () => {
 			// Assert
 			await waitForExpect(() => {
 				expect(spyOnLog).toHaveBeenCalledWith('Command Invoked: git-graph.version');
-				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git Graph: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: 2.25.0', { modal: true }, 'Copy');
-				expect(spyOnCopyToClipboard).toHaveBeenCalledWith('Git Graph: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: 2.25.0');
+				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git History: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: 2.25.0', { modal: true }, 'Copy');
+				expect(spyOnCopyToClipboard).toHaveBeenCalledWith('Git History: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: 2.25.0');
 			});
 		});
 
@@ -1229,7 +1229,7 @@ describe('CommandManager', () => {
 			// Assert
 			await waitForExpect(() => {
 				expect(spyOnLog).toHaveBeenCalledWith('Command Invoked: git-graph.version');
-				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git Graph: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: (none)', { modal: true }, 'Copy');
+				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git History: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: (none)', { modal: true }, 'Copy');
 				expect(spyOnCopyToClipboard).not.toHaveBeenCalled();
 			});
 		});
@@ -1265,8 +1265,8 @@ describe('CommandManager', () => {
 			// Assert
 			await waitForExpect(() => {
 				expect(spyOnLog).toHaveBeenCalledWith('Command Invoked: git-graph.version');
-				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git Graph: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: 2.25.0', { modal: true }, 'Copy');
-				expect(spyOnCopyToClipboard).toHaveBeenCalledWith('Git Graph: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: 2.25.0');
+				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git History: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: 2.25.0', { modal: true }, 'Copy');
+				expect(spyOnCopyToClipboard).toHaveBeenCalledWith('Git History: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: 2.25.0');
 				expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('error message');
 			});
 		});
@@ -1285,7 +1285,7 @@ describe('CommandManager', () => {
 			// Assert
 			await waitForExpect(() => {
 				expect(spyOnLog).toHaveBeenCalledWith('Command Invoked: git-graph.version');
-				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git Graph: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: 2.25.0', { modal: true }, 'Copy');
+				expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git History: 1.27.0\nVisual Studio Code: 1.51.0\nOS: X Y Z\nGit: 2.25.0', { modal: true }, 'Copy');
 				expect(spyOnCopyToClipboard).not.toHaveBeenCalled();
 			});
 		});
@@ -1333,7 +1333,7 @@ describe('CommandManager', () => {
 			expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('Unable to Open File: The command was not called with the required arguments.');
 		});
 
-		it('Should display an error message when no Git Graph URI is provided', async () => {
+		it('Should display an error message when no Git History URI is provided', async () => {
 			vscode.window.activeTextEditor = { document: { uri: vscode.Uri.file('/path/to/workspace-folder/active-file.txt') } };
 			vscode.window.showErrorMessage.mockResolvedValueOnce(null);
 

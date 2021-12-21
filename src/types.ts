@@ -220,7 +220,7 @@ export interface GitRepoState {
 }
 
 
-/* Git Graph View Types */
+/* Git History View Types */
 
 export interface GitGraphViewInitialState {
 	readonly config: GitGraphViewConfig;

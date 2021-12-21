@@ -957,7 +957,7 @@ describe('openExtensionSettings', () => {
 		const result = await openExtensionSettings();
 
 		// Assert
-		expect(result).toBe('Visual Studio Code was unable to open the Git Graph Extension Settings.');
+		expect(result).toBe('Visual Studio Code was unable to open the Git History Extension Settings.');
 	});
 });
 
@@ -1620,7 +1620,7 @@ describe('openGitTerminal', () => {
 			env: {
 				PATH: '/path/to/executable:/path/to/git'
 			},
-			name: 'Git Graph: Name'
+			name: 'Git History: Name'
 		});
 		expect(terminal.sendText).toHaveBeenCalledTimes(0);
 		expect(terminal.show).toHaveBeenCalled();
@@ -1636,7 +1636,7 @@ describe('openGitTerminal', () => {
 			env: {
 				PATH: '/path/to/executable:/path/to/git'
 			},
-			name: 'Git Graph: Name'
+			name: 'Git History: Name'
 		});
 		expect(terminal.sendText).toHaveBeenCalledWith('git rebase');
 		expect(terminal.show).toHaveBeenCalled();
@@ -1655,7 +1655,7 @@ describe('openGitTerminal', () => {
 			env: {
 				PATH: '/path/to/git'
 			},
-			name: 'Git Graph: Name'
+			name: 'Git History: Name'
 		});
 		expect(terminal.sendText).toHaveBeenCalledWith('git rebase');
 		expect(terminal.show).toHaveBeenCalled();
@@ -1674,7 +1674,7 @@ describe('openGitTerminal', () => {
 			env: {
 				PATH: '/path/to/executable:/path/to/git'
 			},
-			name: 'Git Graph: Name',
+			name: 'Git History: Name',
 			shellPath: '/path/to/shell'
 		});
 		expect(terminal.sendText).toHaveBeenCalledWith('git rebase');
@@ -1694,7 +1694,7 @@ describe('openGitTerminal', () => {
 			env: {
 				PATH: '/path/to/executable;/path/to/git'
 			},
-			name: 'Git Graph: Name'
+			name: 'Git History: Name'
 		});
 		expect(terminal.sendText).toHaveBeenCalledWith('git rebase');
 		expect(terminal.show).toHaveBeenCalled();
@@ -1713,7 +1713,7 @@ describe('openGitTerminal', () => {
 			env: {
 				PATH: '/path/to/executable;/path/to/git'
 			},
-			name: 'Git Graph: Name'
+			name: 'Git History: Name'
 		});
 		expect(terminal.sendText).toHaveBeenCalledWith('git rebase');
 		expect(terminal.show).toHaveBeenCalled();
@@ -1732,7 +1732,7 @@ describe('openGitTerminal', () => {
 			env: {
 				PATH: '/path/to/executable;/path/to/git'
 			},
-			name: 'Git Graph: Name'
+			name: 'Git History: Name'
 		});
 		expect(terminal.sendText).toHaveBeenCalledWith('git rebase');
 		expect(terminal.show).toHaveBeenCalled();

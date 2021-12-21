@@ -13,7 +13,7 @@ import { Disposable } from './utils/disposable';
 import { Event } from './utils/event';
 
 /**
- * Manages the registration and execution of Git Graph Commands.
+ * Manages the registration and execution of Git History Commands.
  */
 export class CommandManager extends Disposable {
 	private readonly context: vscode.ExtensionContext;
@@ -25,15 +25,15 @@ export class CommandManager extends Disposable {
 	private gitExecutable: GitExecutable | null;
 
 	/**
-	 * Creates the Git Graph Command Manager.
+	 * Creates the Git History Command Manager.
 	 * @param extensionPath The absolute file path of the directory containing the extension.
-	 * @param avatarManger The Git Graph AvatarManager instance.
-	 * @param dataSource The Git Graph DataSource instance.
-	 * @param extensionState The Git Graph ExtensionState instance.
-	 * @param repoManager The Git Graph RepoManager instance.
-	 * @param gitExecutable The Git executable available to Git Graph at startup.
-	 * @param onDidChangeGitExecutable The Event emitting the Git executable for Git Graph to use.
-	 * @param logger The Git Graph Logger instance.
+	 * @param avatarManger The Git History AvatarManager instance.
+	 * @param dataSource The Git History DataSource instance.
+	 * @param extensionState The Git History ExtensionState instance.
+	 * @param repoManager The Git History RepoManager instance.
+	 * @param gitExecutable The Git executable available to Git History at startup.
+	 * @param onDidChangeGitExecutable The Event emitting the Git executable for Git History to use.
+	 * @param logger The Git History Logger instance.
 	 */
 	constructor(context: vscode.ExtensionContext, avatarManger: AvatarManager, dataSource: DataSource, extensionState: ExtensionState, repoManager: RepoManager, gitExecutable: GitExecutable | null, onDidChangeGitExecutable: Event<GitExecutable>, logger: Logger) {
 		super();
@@ -72,7 +72,7 @@ export class CommandManager extends Disposable {
 	}
 
 	/**
-	 * Register a Git Graph command with Visual Studio Code.
+	 * Register a Git History command with Visual Studio Code.
 	 * @param command A unique identifier for the command.
 	 * @param callback A command handler function.
 	 */
@@ -138,13 +138,13 @@ export class CommandManager extends Disposable {
 				if (isPathInWorkspace(path)) {
 					this.repoManager.registerRepo(path, false).then(status => {
 						if (status.error === null) {
-							showInformationMessage('The repository "' + status.root! + '" was added to Git Graph.');
+							showInformationMessage('The repository "' + status.root! + '" was added to Git History.');
 						} else {
-							showErrorMessage(status.error + ' Therefore it could not be added to Git Graph.');
+							showErrorMessage(status.error + ' Therefore it could not be added to Git History.');
 						}
 					});
 				} else {
-					showErrorMessage('The folder "' + path + '" is not within the opened Visual Studio Code workspace, and therefore could not be added to Git Graph.');
+					showErrorMessage('The folder "' + path + '" is not within the opened Visual Studio Code workspace, and therefore could not be added to Git History.');
 				}
 			}
 		}, () => { });
@@ -166,14 +166,14 @@ export class CommandManager extends Disposable {
 		}));
 
 		vscode.window.showQuickPick(items, {
-			placeHolder: 'Select a repository to remove from Git Graph:',
+			placeHolder: 'Select a repository to remove from Git History:',
 			canPickMany: false
 		}).then((item) => {
 			if (item && item.description !== undefined) {
 				if (this.repoManager.ignoreRepo(item.description)) {
-					showInformationMessage('The repository "' + item.label + '" was removed from Git Graph.');
+					showInformationMessage('The repository "' + item.label + '" was removed from Git History.');
 				} else {
-					showErrorMessage('The repository "' + item.label + '" is not known to Git Graph.');
+					showErrorMessage('The repository "' + item.label + '" is not known to Git History.');
 				}
 			}
 		}, () => { });
@@ -217,7 +217,7 @@ export class CommandManager extends Disposable {
 			}
 
 			vscode.window.showQuickPick(items, {
-				placeHolder: 'Select the repository you want to open in Git Graph, and fetch from remote(s):',
+				placeHolder: 'Select the repository you want to open in Git History, and fetch from remote(s):',
 				canPickMany: false
 			}).then((item) => {
 				if (item && item.description) {
@@ -310,7 +310,7 @@ export class CommandManager extends Disposable {
 	private async version() {
 		try {
 			const gitGraphVersion = await getExtensionVersion(this.context);
-			const information = 'Git Graph: ' + gitGraphVersion + '\nVisual Studio Code: ' + vscode.version + '\nOS: ' + os.type() + ' ' + os.arch() + ' ' + os.release() + '\nGit: ' + (this.gitExecutable !== null ? this.gitExecutable.version : '(none)');
+			const information = 'Git History: ' + gitGraphVersion + '\nVisual Studio Code: ' + vscode.version + '\nOS: ' + os.type() + ' ' + os.arch() + ' ' + os.release() + '\nGit: ' + (this.gitExecutable !== null ? this.gitExecutable.version : '(none)');
 			vscode.window.showInformationMessage(information, { modal: true }, 'Copy').then((selectedItem) => {
 				if (selectedItem === 'Copy') {
 					copyToClipboard(information).then((result) => {
@@ -326,14 +326,14 @@ export class CommandManager extends Disposable {
 	}
 
 	/**
-	 * Opens a file in Visual Studio Code, based on a Git Graph URI (from the Diff View).
+	 * Opens a file in Visual Studio Code, based on a Git History URI (from the Diff View).
 	 * The method run when the `git-graph.openFile` command is invoked.
-	 * @param arg The Git Graph URI.
+	 * @param arg The Git History URI.
 	 */
 	private openFile(arg?: vscode.Uri) {
 		const uri = arg || vscode.window.activeTextEditor?.document.uri;
 		if (typeof uri === 'object' && uri && uri.scheme === DiffDocProvider.scheme) {
-			// A Git Graph URI has been provided
+			// A Git History URI has been provided
 			const request = decodeDiffDocUri(uri);
 			return openFile(request.repo, request.filePath, request.commit, this.dataSource, vscode.ViewColumn.Active).then((errorInfo) => {
 				if (errorInfo !== null) {

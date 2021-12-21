@@ -2128,8 +2128,8 @@ describe('RepoManager', () => {
 
 			// Assert
 			await waitForExpect(() => expect(vscode.window.showInformationMessage).toHaveBeenCalledTimes(2));
-			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('A newer Git Graph Repository Configuration File has been detected for the repository "repo1". Would you like to override your current repository configuration with the new changes?', 'Yes', 'No');
-			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git Graph Repository Configuration was successfully imported for the repository "repo1".');
+			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('A newer Git History Repository Configuration File has been detected for the repository "repo1". Would you like to override your current repository configuration with the new changes?', 'Yes', 'No');
+			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git History Repository Configuration was successfully imported for the repository "repo1".');
 			expect(spyOnBufferedQueueEnqueue).toHaveBeenCalledWith('/path/to/workspace-folder1/repo1');
 		});
 
@@ -2153,8 +2153,8 @@ describe('RepoManager', () => {
 
 			// Assert
 			await waitForExpect(() => expect(vscode.window.showInformationMessage).toHaveBeenCalledTimes(2));
-			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('A newer Git Graph Repository Configuration File has been detected for the repository "Old Name". Would you like to override your current repository configuration with the new changes?', 'Yes', 'No');
-			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git Graph Repository Configuration was successfully imported for the repository "Name".');
+			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('A newer Git History Repository Configuration File has been detected for the repository "Old Name". Would you like to override your current repository configuration with the new changes?', 'Yes', 'No');
+			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Git History Repository Configuration was successfully imported for the repository "Name".');
 			expect(spyOnBufferedQueueEnqueue).toHaveBeenCalledWith('/path/to/workspace-folder1/repo1');
 		});
 
@@ -2242,7 +2242,7 @@ describe('RepoManager', () => {
 			expect(JSON.parse(spyOnWriteFile.mock.calls[0][1])).toStrictEqual({
 				'exportedAt': 1587559258000
 			});
-			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Successfully exported the Git Graph Repository Configuration to "/path/to/workspace-folder1/repo1/.vscode/vscode-git-graph.json".');
+			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Successfully exported the Git History Repository Configuration to "/path/to/workspace-folder1/repo1/.vscode/vscode-git-graph.json".');
 			expect(spyOnSaveRepos).toHaveBeenCalledWith({
 				'/path/to/workspace-folder1/repo1': {
 					cdvDivider: 0.5,
@@ -2293,7 +2293,7 @@ describe('RepoManager', () => {
 			expect(JSON.parse(spyOnWriteFile.mock.calls[0][1])).toStrictEqual({
 				'exportedAt': 1587559258000
 			});
-			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Successfully exported the Git Graph Repository Configuration to "/path/to/workspace-folder1/repo1/.vscode/vscode-git-graph.json".');
+			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Successfully exported the Git History Repository Configuration to "/path/to/workspace-folder1/repo1/.vscode/vscode-git-graph.json".');
 			expect(spyOnSaveRepos).not.toHaveBeenCalled();
 
 			// Teardown
@@ -2320,7 +2320,7 @@ describe('RepoManager', () => {
 			expect(JSON.parse(spyOnWriteFile.mock.calls[0][1])).toStrictEqual({
 				'exportedAt': 1587559258000
 			});
-			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Successfully exported the Git Graph Repository Configuration to "/path/to/workspace-folder1/repo1/.vscode/vscode-git-graph.json".');
+			expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Successfully exported the Git History Repository Configuration to "/path/to/workspace-folder1/repo1/.vscode/vscode-git-graph.json".');
 			expect(spyOnSaveRepos).toHaveBeenCalledWith({
 				'/path/to/workspace-folder1/repo1': {
 					cdvDivider: 0.5,
@@ -2361,7 +2361,7 @@ describe('RepoManager', () => {
 			const result = await repoManager.exportRepoConfig('/path/to/workspace-folder1/repo1');
 
 			// Assert
-			expect(result).toBe('An unexpected error occurred while checking if the "/path/to/workspace-folder1/repo1/.vscode" directory exists. This directory is used to store the Git Graph Repository Configuration file.');
+			expect(result).toBe('An unexpected error occurred while checking if the "/path/to/workspace-folder1/repo1/.vscode" directory exists. This directory is used to store the Git History Repository Configuration file.');
 			expect(spyOnSaveRepos).not.toHaveBeenCalled();
 
 			// Teardown
@@ -2381,7 +2381,7 @@ describe('RepoManager', () => {
 			const result = await repoManager.exportRepoConfig('/path/to/workspace-folder1/repo1');
 
 			// Assert
-			expect(result).toBe('Failed to write the Git Graph Repository Configuration File to "/path/to/workspace-folder1/repo1/.vscode/vscode-git-graph.json".');
+			expect(result).toBe('Failed to write the Git History Repository Configuration File to "/path/to/workspace-folder1/repo1/.vscode/vscode-git-graph.json".');
 			expect(spyOnSaveRepos).not.toHaveBeenCalled();
 
 			// Teardown
