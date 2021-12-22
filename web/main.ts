@@ -104,7 +104,7 @@ export class GitGraphView {
 			this.loadRepo(values[0]);
 		});
 
-		this.branchDropdown = new Dropdown('branchDropdown', false, true, 'Branches', (values) => {
+		this.branchDropdown = new Dropdown('branchDropdown', false, false, 'Branches', (values) => {
 			this.currentBranches = values;
 			this.maxCommits = this.config.initialLoadCommits;
 			this.saveState();
@@ -550,7 +550,7 @@ export class GitGraphView {
 	public getBranchOptions(includeShowAll?: boolean): ReadonlyArray<DialogSelectInputOption> {
 		const options: DialogSelectInputOption[] = [];
 		if (includeShowAll) {
-			options.push({ name: 'Show All', value: SHOW_ALL_BRANCHES });
+			options.push({ name: 'All', value: SHOW_ALL_BRANCHES });
 		}
 		for (let i = 0; i < this.config.customBranchGlobPatterns.length; i++) {
 			options.push({ name: 'Glob: ' + this.config.customBranchGlobPatterns[i].name, value: this.config.customBranchGlobPatterns[i].glob });

@@ -722,7 +722,7 @@ export class GitGraphView extends Disposable {
 			<div id="view" tabindex="-1">
 				<div id="controls">
 					<span id="repoControl"><span class="unselectable">Repo: </span><div id="repoDropdown" class="dropdown"></div></span>
-					<span id="branchControl"><span class="unselectable">Branches: </span><div id="branchDropdown" class="dropdown"></div></span>
+					<span id="branchControl"><span class="unselectable">Branch: </span><div id="branchDropdown" class="dropdown"></div></span>
 					<label id="showRemoteBranchesControl"><input type="checkbox" id="showRemoteBranchesCheckbox" tabindex="-1"><span class="customCheckbox"></span>Show Remote Branches</label>
 					<div id="fetchBtn"></div>
 					<div id="terminalBtn" title="Open a Terminal for this Repository"></div>
