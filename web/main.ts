@@ -2415,6 +2415,7 @@ export class GitGraphView {
 
 		const elem = document.getElementById('cdv'), isDocked = this.isCdvDocked();
 		if (elem !== null) {
+			this.setContentHeight()
 			elem.remove();
 		}
 		if (isDocked) {
