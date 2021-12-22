@@ -814,13 +814,22 @@ body.tagLabelsRightAligned .gitRef.tag{
 	user-select:none;
 }
 
+.toolbar{
+	display: inline-block;
+	top: 50%;
+    transform: translateY(16%);
+}
+
 #searchInput{
 	display: inline-block;
-	margin: 0 10px;
-	border: 1px solid var(--vscode-quickInputTitle-background);
+	margin-left: 10px;
+	border: 1px solid rgba(128,128,128,0.5);
+	width: 180px;
     background-color: var(--vscode-editor-background);
-    padding: 3px;
+    padding: 4px;
+	padding-left: 8px;
     box-sizing: border-box;
+	border-radius: 4px;
 	color: var(--vscode-foreground);
 }
 

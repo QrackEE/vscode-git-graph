@@ -129,7 +129,9 @@ export class GitGraphView {
 			this.refresh(true);
 		});
 
-		document.getElementById('searchInput')?.addEventListener("keypress", (e: any) => {
+		const searchInput:HTMLInputElement=document.getElementById('searchInput') as any;
+		searchInput.placeholder="Enter to search commit"
+		searchInput?.addEventListener("keypress", (e: any) => {
 			if (e.key == "Enter") {
 				this.searchValue = e.target.value;
 				this.maxCommits = this.config.initialLoadCommits;
@@ -1162,17 +1164,8 @@ export class GitGraphView {
 				onClick: () => {
 					sendMessage({ command: 'copyToClipboard', type: 'Commit Hash', data: hash });
 				}
-			},
-			{
-				title: 'Add Tag' + ELLIPSIS,
-				visible: visibility.addTag,
-				onClick: (e) => { target.event = e; this.addTagAction(hash, '', this.config.dialogDefaults.addTag.type, '', null, target) }
 			}, {
-				title: 'Create Branch' + ELLIPSIS,
-				visible: visibility.createBranch,
-				onClick: (event) => { target.event = event; this.createBranchAction(hash, '', this.config.dialogDefaults.createBranch.checkout, target) }
-			}, {
-				title: 'Reset to this commit' + ELLIPSIS,
+				title: 'Reset Branch' + ELLIPSIS,
 				visible: visibility.reset,
 				onClick: (event) => {
 					target.event = event;
@@ -1184,6 +1177,15 @@ export class GitGraphView {
 						runAction({ command: 'resetToCommit', repo: this.currentRepo, commit: hash, resetMode: <GG.GitResetMode>mode }, 'Resetting to Commit');
 					}, target);
 				}
+			},
+			{
+				title: 'Add Tag' + ELLIPSIS,
+				visible: visibility.addTag,
+				onClick: (e) => { target.event = e; this.addTagAction(hash, '', this.config.dialogDefaults.addTag.type, '', null, target) }
+			}, {
+				title: 'Create Branch' + ELLIPSIS,
+				visible: visibility.createBranch,
+				onClick: (event) => { target.event = event; this.createBranchAction(hash, '', this.config.dialogDefaults.createBranch.checkout, target) }
 			}
 		], [
 			{
@@ -2017,6 +2019,12 @@ export class GitGraphView {
 	/* Observers */
 
 	private setContentHeight(cdvHeight: number = 0) {
+		if(!cdvHeight){
+			const cdv=document.getElementById('cdv')
+			if(cdv){
+				cdvHeight=parseInt(cdv.style.height.replace("px",''))
+			}
+		}
 		const content = document.getElementById('content')
 		const height = window.innerHeight - 42 - cdvHeight;
 		content!.style.height = height + "px";
@@ -3126,21 +3134,21 @@ export class GitGraphView {
 
 			contextMenu.show([
 				[
-					{
-						title: 'Open File',
-						visible: visibility.openFile && file.type !== GG.GitFileStatus.Deleted,
-						onClick: () => triggerOpenFile(file, fileElem)
-					},
-					{
-						title: 'View Diff',
-						visible: visibility.viewDiff && diffPossible,
-						onClick: () => triggerViewFileDiff(file, fileElem)
-					},
-					{
-						title: 'View File at this Revision',
-						visible: visibility.viewFileAtThisRevision && fileExistsAtThisRevisionAndDiffPossible,
-						onClick: () => triggerViewFileAtRevision(file, fileElem)
-					},
+					// {
+					// 	title: 'Open File',
+					// 	visible: visibility.openFile && file.type !== GG.GitFileStatus.Deleted,
+					// 	onClick: () => triggerOpenFile(file, fileElem)
+					// },
+					// {
+					// 	title: 'View Diff',
+					// 	visible: visibility.viewDiff && diffPossible,
+					// 	onClick: () => triggerViewFileDiff(file, fileElem)
+					// },
+					// {
+					// 	title: 'View File at this Revision',
+					// 	visible: visibility.viewFileAtThisRevision && fileExistsAtThisRevisionAndDiffPossible,
+					// 	onClick: () => triggerViewFileAtRevision(file, fileElem)
+					// },
 					{
 						title: 'View Diff with Working File',
 						visible: visibility.viewDiffWithWorkingFile && fileExistsAtThisRevisionAndDiffPossible,
@@ -3676,7 +3684,7 @@ export function generateFileTreeLeafHtml(name: string, leaf: FileTreeLeaf, gitFi
 			(fileTreeFile.newFilePath === lastViewedFile ? '<span id="cdvLastFileViewed" title="Last File Viewed">' + SVG_ICONS.eyeOpen + '</span>' : '') +
 			'<span class="copyGitFile fileTreeFileAction" title="Copy Absolute File Path to Clipboard">' + SVG_ICONS.copy + '</span>' +
 			(fileTreeFile.type !== GG.GitFileStatus.Deleted
-				? (diffPossible && !isUncommitted ? '<span class="viewGitFileAtRevision fileTreeFileAction" title="View File at this Revision">' + SVG_ICONS.commit + '</span>' : '') +
+				? (diffPossible && !isUncommitted ? '<span class="viewGitFileAtRevision fileTreeFileAction" title="View File Content">' + SVG_ICONS.commit + '</span>' : '') +
 				'<span class="openGitFile fileTreeFileAction" title="Open File">' + SVG_ICONS.openFile + '</span>'
 				: ''
 			) + '</span></li>';
