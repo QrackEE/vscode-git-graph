@@ -109,11 +109,6 @@
 			"type": "object",
 			"title": "Git History",
 			"properties": {
-				"git-graph.commitDetailsView.autoCenter": {
-					"type": "boolean",
-					"default": false,
-					"description": "Automatically center the Commit Details View when it is opened."
-				},
 				"git-graph.commitDetailsView.fileView.fileTree.compactFolders": {
 					"type": "boolean",
 					"default": true,
@@ -131,19 +126,6 @@
 					],
 					"default": "File Tree",
 					"description": "Sets the default type of File View used in the Commit Details View. This can be overridden per repository using the controls on the right side of the Commit Details View."
-				},
-				"git-graph.commitDetailsView.location": {
-					"type": "string",
-					"enum": [
-						"Inline",
-						"Docked to Bottom"
-					],
-					"enumDescriptions": [
-						"Show the Commit Details View inline with the graph & commits.",
-						"Show the Commit Details View docked to the bottom of the Git History View."
-					],
-					"default": "Inline",
-					"description": "Specifies where the Commit Details View is rendered in the Git History View."
 				},
 				"git-graph.contextMenuActionsVisibility": {
 					"type": "object",
@@ -1175,13 +1157,6 @@
 					"default": "colour",
 					"description": "Specifies the colour theme of the icon displayed on the Git History tab."
 				},
-				"git-graph.autoCenterCommitDetailsView": {
-					"type": "boolean",
-					"default": true,
-					"description": "Automatically center the commit details view when it is opened.",
-					"deprecationMessage": "Depreciated: This setting has been renamed to git-graph.commitDetailsView.autoCenter",
-					"markdownDeprecationMessage": "Depreciated: This setting has been renamed to `#git-graph.commitDetailsView.autoCenter#`"
-				},
 				"git-graph.combineLocalAndRemoteBranchLabels": {
 					"type": "boolean",
 					"default": true,
@@ -1195,21 +1170,6 @@
 					"description": "Render the File Tree in the Commit Details / Comparison View in a compacted form, such that folders with a single child folder are compressed into a single combined folder element.",
 					"deprecationMessage": "Depreciated: This setting has been renamed to git-graph.commitDetailsView.fileView.fileTree.compactFolders",
 					"markdownDeprecationMessage": "Depreciated: This setting has been renamed to `#git-graph.commitDetailsView.fileView.fileTree.compactFolders#`"
-				},
-				"git-graph.commitDetailsViewLocation": {
-					"type": "string",
-					"enum": [
-						"Inline",
-						"Docked to Bottom"
-					],
-					"enumDescriptions": [
-						"Show the Commit Details View inline with the graph",
-						"Show the Commit Details View docked to the bottom of the Git History view"
-					],
-					"default": "Inline",
-					"description": "Specifies where the Commit Details View is rendered in the Git History view.",
-					"deprecationMessage": "Depreciated: This setting has been renamed to git-graph.commitDetailsView.location",
-					"markdownDeprecationMessage": "Depreciated: This setting has been renamed to `#git-graph.commitDetailsView.location#`"
 				},
 				"git-graph.commitOrdering": {
 					"type": "string",

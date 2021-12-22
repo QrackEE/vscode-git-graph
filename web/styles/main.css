@@ -317,7 +317,8 @@ code{
 	left:0;
 	right:0;
 	bottom:0;
-	background-color:rgba(128,128,128,0.1);
+	background-color: var(--vscode-editor-background);
+	/* background-color:rgba(128,128,128,0.1); */
 	font-size:13px;
 	line-height:18px;
 	white-space:normal;
@@ -563,10 +564,16 @@ code{
 #cdvLastFileViewed{
 	margin-left:8px;
 	cursor:help;
+	display: none;
 }
+
+.copyGitFile{
+	display: none;
+}
+
 .fileTreeFileAction{
 	margin-left:8px;
-	opacity:0;
+	opacity:1;
 }
 .fileTreeFileAction.viewGitFileAtRevision, .fileTreeFileAction.openGitFile{
 	margin-left:6px;

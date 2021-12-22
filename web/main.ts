@@ -814,15 +814,15 @@ export class GitGraphView {
 		const colHeadersElem = document.getElementById('tableColHeaders');
 		const cdvHeight = this.gitRepos[this.currentRepo].cdvHeight;
 		const headerHeight = colHeadersElem !== null ? colHeadersElem.clientHeight + 1 : 0;
-		const expandedCommit = this.isCdvDocked() ? null : this.expandedCommit;
-		const expandedCommitElem = expandedCommit !== null ? document.getElementById('cdv') : null;
+		// const expandedCommit = this.isCdvDocked() ? null : this.expandedCommit;
+		const expandedCommit = null;
+		// const expandedCommitElem = expandedCommit !== null ? document.getElementById('cdv') : null;
 
 		// Update the graphs grid dimensions
-		this.config.graph.grid.expandY = expandedCommitElem !== null
-			? expandedCommitElem.getBoundingClientRect().height
-			: cdvHeight;
+		// this.config.graph.grid.expandY = expandedCommitElem !== null ? expandedCommitElem.getBoundingClientRect().height : cdvHeight;
+		this.config.graph.grid.expandY =  cdvHeight;
 		this.config.graph.grid.y = this.commits.length > 0 && this.tableElem.children.length > 0
-			? (this.tableElem.children[0].clientHeight - headerHeight - (expandedCommit !== null ? cdvHeight : 0)) / this.commits.length
+			? (this.tableElem.children[0].clientHeight - headerHeight - ( 0)) / this.commits.length
 			: this.config.graph.grid.y;
 		this.config.graph.grid.offsetY = headerHeight + this.config.graph.grid.y / 2;
 
@@ -1982,7 +1982,14 @@ export class GitGraphView {
 
 	/* Observers */
 
+	private setContentHeight(cdvHeight:number=0) {
+		const content = document.getElementById('content')
+		const height = window.innerHeight  - 42 - cdvHeight;
+		content!.style.height = height + "px";
+	}
+
 	private observeWindowSizeChanges() {
+		this.setContentHeight()
 		let windowWidth = window.outerWidth, windowHeight = window.outerHeight;
 		window.addEventListener('resize', () => {
 			if (windowWidth === window.outerWidth && windowHeight === window.outerHeight) {
@@ -1991,6 +1998,7 @@ export class GitGraphView {
 				windowWidth = window.outerWidth;
 				windowHeight = window.outerHeight;
 			}
+			this.setContentHeight()
 		});
 	}
 
@@ -2556,7 +2564,7 @@ export class GitGraphView {
 		const expandedCommit = this.expandedCommit;
 		if (expandedCommit === null || expandedCommit.commitElem === null) return;
 
-		let elem = document.getElementById('cdv'), html = '<div id="cdvContent">', isDocked = this.isCdvDocked();
+		let elem = document.getElementById('cdv'), html = '<div id="cdvContent">', isDocked = true;
 		const commitOrder = this.getCommitOrder(expandedCommit.commitHash, expandedCommit.compareWithHash === null ? expandedCommit.commitHash : expandedCommit.compareWithHash);
 		const codeReviewPossible = !expandedCommit.loading && commitOrder.to !== UNCOMMITTED;
 		const externalDiffPossible = !expandedCommit.loading && (expandedCommit.compareWithHash !== null || this.commits[this.commitLookup[expandedCommit.commitHash]].parents.length > 0);
@@ -2567,7 +2575,7 @@ export class GitGraphView {
 			elem.className = isDocked ? 'docked' : 'inline';
 			this.setCdvHeight(elem, isDocked);
 			if (isDocked) {
-				document.body.appendChild(elem);
+				document.getElementById('footer')!.appendChild(elem);
 			} else {
 				insertAfter(elem, expandedCommit.commitElem);
 			}
@@ -2638,11 +2646,7 @@ export class GitGraphView {
 				}
 			} else {
 				let elemTop = this.controlsElem.clientHeight + elem.offsetTop, cdvHeight = this.gitRepos[this.currentRepo].cdvHeight;
-				if (this.config.commitDetailsView.autoCenter) {
-					// Center Commit Detail View setting is enabled
-					// elemTop - commit height [24px] + (commit details view height + commit height [24px]) / 2 - (view height) / 2
-					this.viewElem.scroll(0, elemTop - 12 + (cdvHeight - this.viewElem.clientHeight) / 2);
-				} else if (elemTop - 32 < this.viewElem.scrollTop) {
+				if (elemTop - 32 < this.viewElem.scrollTop) {
 					// Commit Detail View is opening above what is visible on screen
 					// elemTop - commit height [24px] - desired gap from top [8px] < view scroll offset
 					this.viewElem.scroll(0, elemTop - 32);
@@ -2745,7 +2749,8 @@ export class GitGraphView {
 
 		let heightPx = height + 'px';
 		elem.style.height = heightPx;
-		if (isDocked) this.viewElem.style.bottom = heightPx;
+		// if (isDocked) this.viewElem.style.bottom = heightPx;
+		this.setContentHeight(height)
 	}
 
 	private setCdvDivider() {
@@ -2874,7 +2879,7 @@ export class GitGraphView {
 	}
 
 	private isCdvDocked() {
-		return this.config.commitDetailsView.location === GG.CommitDetailsViewLocation.DockedToBottom;
+		return true;
 	}
 
 	public isCdvOpen(commitHash: string, compareWithHash: string | null) {
@@ -3221,14 +3226,6 @@ let loaded = false;
 
 window.addEventListener('load', () => {
 	if (loaded) return;
-
-	function setContentHeight() {
-		const content = document.getElementById('content')
-		const height = window.outerHeight - 128;
-		content!.style.height = height + "px";
-	}
-	setContentHeight()
-	window.onresize = setContentHeight;
 
 	loaded = true;
 

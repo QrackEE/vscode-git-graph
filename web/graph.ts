@@ -301,7 +301,8 @@ class Vertex {
 
 	public draw(svg: SVGElement, config: GG.GraphConfig, expandOffset: boolean, overListener: (event: MouseEvent) => void, outListener: (event: MouseEvent) => void) {
 		if (this.onBranch === null) return;
-
+		// disable expend
+		expandOffset=false;
 		const colour = this.isCommitted ? config.colours[this.onBranch.getColour() % config.colours.length] : '#808080';
 		const cx = (this.x * config.grid.x + config.grid.offsetX).toString();
 		const cy = (this.id * config.grid.y + config.grid.offsetY + (expandOffset ? config.grid.expandY : 0)).toString();

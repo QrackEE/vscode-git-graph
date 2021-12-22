@@ -239,10 +239,8 @@ export interface GitGraphViewWorkspaceState {
     findOpenCommitDetailsView: boolean;
 }
 export interface CommitDetailsViewConfig {
-    readonly autoCenter: boolean;
     readonly fileTreeCompactFolders: boolean;
     readonly fileViewType: FileViewType;
-    readonly location: CommitDetailsViewLocation;
 }
 export interface GraphConfig {
     readonly colours: ReadonlyArray<string>;
