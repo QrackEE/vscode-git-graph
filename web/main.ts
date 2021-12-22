@@ -1739,6 +1739,7 @@ export class GitGraphView {
 	/* Table Utils */
 
 	private makeTableResizable() {
+		console.log('makeTableResizable')
 		// let colHeadersElem = document.getElementById('tableColHeaders')!, cols = <HTMLCollectionOf<HTMLElement>>document.getElementsByClassName('tableColHeader');
 		let cols:HTMLCollectionOf<HTMLElement> = document.querySelectorAll('.commit td') as any;
 		let columnWidths: GG.ColumnWidth[], mouseX = -1, col = -1, colIndex = -1;
@@ -1788,7 +1789,7 @@ export class GitGraphView {
 			}
 
 			if (colWidth < Math.max(graphWidth, 64)) {
-				cols[0].style.padding = '6px ' + Math.floor((Math.max(graphWidth, 64) - (colWidth - COLUMN_LEFT_RIGHT_PADDING)) / 2) + 'px';
+				cols[0].style.padding = '6px ' + Math.floor((Math.max(graphWidth, 64) - (50 - COLUMN_LEFT_RIGHT_PADDING)) / 2) + 'px';
 			}
 		}
 

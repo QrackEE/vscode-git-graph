@@ -735,6 +735,7 @@ body.vscode-high-contrast #commitTable tr.commit.findCurrentCommit{
 }
 .gitRef.active .gitRefName{
 	font-weight:bold;
+	font-size: 14px;
 }
 .gitRef > svg{
 	background-color:var(--git-graph-color);
@@ -1051,4 +1052,6 @@ label > input[type=radio]:checked ~ .customRadio:after{
 #commitGraph, #commitTable th, #commitTable td, .gitRef, #loadingHeader, .unselectable, .roundedBtn, #controls label{
 	-webkit-user-select:none;
 	user-select:none;
+	/* padding: 6px 12px; */
+	padding: 2px 4px;
 }
