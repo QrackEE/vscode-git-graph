@@ -34,7 +34,7 @@ export class GitGraphView {
 	private avatars: AvatarImageCollection = {};
 	private currentBranches: string[] | null = null;
 	private searchValue: string | null = null;
-	private currentAuthors: string[]=[];
+	private currentAuthors: string[] = [];
 
 	private currentRepo!: string;
 	private currentRepoLoading: boolean = true;
@@ -129,6 +129,15 @@ export class GitGraphView {
 			this.refresh(true);
 		});
 
+		document.getElementById('searchInput')?.addEventListener("keypress", (e: any) => {
+			if (e.key == "Enter") {
+				this.searchValue = e.target.value;
+				this.maxCommits = this.config.initialLoadCommits;
+				this.saveState();
+				this.clearCommits();
+				this.requestLoadRepoInfoAndCommits(true, true);
+			}
+		})
 		this.refreshBtnElem = document.getElementById('refreshBtn')!;
 		this.refreshBtnElem.addEventListener('click', () => {
 			if (!this.refreshBtnElem.classList.contains(CLASS_REFRESHING)) {

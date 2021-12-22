@@ -721,6 +721,7 @@ export class GitGraphView extends Disposable {
 			body = `<body>
 			<div id="view" tabindex="-1">
 				<div id="controls">
+					<input id="searchInput"/>
 					<span id="repoControl"><span class="unselectable">Repo: </span><div id="repoDropdown" class="dropdown"></div></span>
 					<span id="branchControl"><span class="unselectable">Branch: </span><div id="branchDropdown" class="dropdown"></div></span>
 					<span id="authorControl"><span class="unselectable">Author: </span><div id="authorDropdown" class="dropdown"></div></span>

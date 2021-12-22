@@ -814,6 +814,16 @@ body.tagLabelsRightAligned .gitRef.tag{
 	user-select:none;
 }
 
+#searchInput{
+	display: inline-block;
+	margin: 0 10px;
+	border: 1px solid var(--vscode-quickInputTitle-background);
+    background-color: var(--vscode-editor-background);
+    padding: 3px;
+    box-sizing: border-box;
+	color: var(--vscode-foreground);
+}
+
 #repoControl, #branchControl, #showRemoteBranchesControl{
 	display:inline-block;
 	white-space:nowrap;
