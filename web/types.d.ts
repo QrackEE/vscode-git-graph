@@ -822,6 +822,7 @@ export interface ResponseLoadCommits extends ResponseWithErrorInfo {
     readonly refreshId: number;
     readonly commits: GitCommit[];
     readonly head: string | null;
+    readonly relPath: string | undefined;
     readonly tags: string[];
     readonly moreCommitsAvailable: boolean;
     readonly onlyFollowFirstParent: boolean;

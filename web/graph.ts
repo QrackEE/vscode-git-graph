@@ -395,7 +395,7 @@ export class Graph {
 
 	/* Graph Operations */
 
-	public loadCommits(commits: ReadonlyArray<GG.GitCommit>, commitHead: string | null, commitLookup: { [hash: string]: number }, onlyFollowFirstParent: boolean) {
+	public loadCommits(commits: ReadonlyArray<GG.GitCommit>, commitHead: string | null, commitLookup: { [hash: string]: number }, onlyFollowFirstParent: boolean,relPath?:string) {
 		this.commits = commits;
 		this.commitHead = commitHead;
 		this.commitLookup = commitLookup;
@@ -410,10 +410,19 @@ export class Graph {
 		for (i = 0; i < commits.length; i++) {
 			this.vertices.push(new Vertex(i, commits[i].stash !== null));
 		}
+		console.log(relPath)
 		for (i = 0; i < commits.length; i++) {
 			for (j = 0; j < commits[i].parents.length; j++) {
 				let parentHash = commits[i].parents[j];
-				if (typeof commitLookup[parentHash] === 'number') {
+				// 如果是单文件, 只生成一条线
+				if(relPath){
+					const nextCommit=commits[i+1];
+					if(nextCommit){
+						this.vertices[i].addParent(this.vertices[i+1]);
+						this.vertices[i+1].addChild(this.vertices[i]);
+					}
+					continue;
+				}else if (typeof commitLookup[parentHash] === 'number') {
 					// Parent is the <commitLookup[parentHash]>th vertex
 					this.vertices[i].addParent(this.vertices[commitLookup[parentHash]]);
 					this.vertices[commitLookup[parentHash]].addChild(this.vertices[i]);

@@ -264,6 +264,7 @@ export class DataSource extends Disposable {
 			return {
 				commits: commitNodes,
 				head: refData.head,
+				relPath,
 				tags: unique(refData.tags.map((tag) => tag.name)),
 				moreCommitsAvailable: moreCommitsAvailable,
 				error: null

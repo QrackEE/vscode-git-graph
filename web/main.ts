@@ -29,6 +29,7 @@ export class GitGraphView {
 	private gitTags: ReadonlyArray<string> = [];
 	private commits: GG.GitCommit[] = [];
 	private commitHead: string | null = null;
+	private relPath: string | undefined;
 	private commitLookup: { [hash: string]: number } = {};
 	private onlyFollowFirstParent: boolean = false;
 	private avatars: AvatarImageCollection = {};
@@ -417,7 +418,7 @@ export class GitGraphView {
 
 		this.saveState();
 
-		this.graph.loadCommits(this.commits, this.commitHead, this.commitLookup, this.onlyFollowFirstParent);
+		this.graph.loadCommits(this.commits, this.commitHead, this.commitLookup, this.onlyFollowFirstParent,this.relPath);
 		this.render();
 
 		if (currentRepoLoading && this.config.onRepoLoad.scrollToHead && this.commitHead !== null) {
@@ -498,7 +499,7 @@ export class GitGraphView {
 		this.renderedGitBranchHead = null;
 		this.closeCommitDetails(false);
 		this.saveState();
-		this.graph.loadCommits(this.commits, this.commitHead, this.commitLookup, this.onlyFollowFirstParent);
+		this.graph.loadCommits(this.commits, this.commitHead, this.commitLookup, this.onlyFollowFirstParent, this.relPath);
 		this.tableElem.innerHTML = '';
 		this.footerElem.innerHTML = '';
 		this.renderGraph();
@@ -520,6 +521,7 @@ export class GitGraphView {
 		if (msg.error === null) {
 			const refreshState = this.currentRepoRefreshState;
 			if (refreshState.inProgress && refreshState.loadCommitsRefreshId === msg.refreshId) {
+				this.relPath=msg.relPath;
 				this.loadCommits(msg.commits, msg.head, msg.tags, msg.moreCommitsAvailable, msg.onlyFollowFirstParent);
 			}
 		} else {
