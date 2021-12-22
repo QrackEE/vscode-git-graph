@@ -113,7 +113,6 @@ export class CommandManager extends Disposable {
 		let relPath = "";
 		if (arg instanceof vscode.Uri) {
 			relPath = await GitAPi.getRelative(arg)
-			console.log(relPath)
 		} else if (arg?.rootUri) {
 			// If command is run from the Visual Studio Code Source Control View, load the specific repo
 			const repoPath = getPathFromUri(arg.rootUri);

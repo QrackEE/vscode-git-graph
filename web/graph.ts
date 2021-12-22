@@ -410,7 +410,6 @@ export class Graph {
 		for (i = 0; i < commits.length; i++) {
 			this.vertices.push(new Vertex(i, commits[i].stash !== null));
 		}
-		console.log(relPath)
 		for (i = 0; i < commits.length; i++) {
 			for (j = 0; j < commits[i].parents.length; j++) {
 				let parentHash = commits[i].parents[j];

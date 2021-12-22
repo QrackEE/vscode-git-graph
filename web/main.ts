@@ -33,6 +33,7 @@ export class GitGraphView {
 	private commitLookup: { [hash: string]: number } = {};
 	private onlyFollowFirstParent: boolean = false;
 	private avatars: AvatarImageCollection = {};
+	private mousePosition = {x:0,y:0};
 	private currentBranches: string[] | null = null;
 	private searchValue: string | null = null;
 	private currentAuthors: string[] = [];
@@ -130,8 +131,8 @@ export class GitGraphView {
 			this.refresh(true);
 		});
 
-		const searchInput:HTMLInputElement=document.getElementById('searchInput') as any;
-		searchInput.placeholder="Enter to search commit"
+		const searchInput: HTMLInputElement = document.getElementById('searchInput') as any;
+		searchInput.placeholder = "Enter to search commit"
 		searchInput?.addEventListener("keypress", (e: any) => {
 			if (e.key == "Enter") {
 				this.searchValue = e.target.value;
@@ -418,7 +419,7 @@ export class GitGraphView {
 
 		this.saveState();
 
-		this.graph.loadCommits(this.commits, this.commitHead, this.commitLookup, this.onlyFollowFirstParent,this.relPath);
+		this.graph.loadCommits(this.commits, this.commitHead, this.commitLookup, this.onlyFollowFirstParent, this.relPath);
 		this.render();
 
 		if (currentRepoLoading && this.config.onRepoLoad.scrollToHead && this.commitHead !== null) {
@@ -521,7 +522,7 @@ export class GitGraphView {
 		if (msg.error === null) {
 			const refreshState = this.currentRepoRefreshState;
 			if (refreshState.inProgress && refreshState.loadCommitsRefreshId === msg.refreshId) {
-				this.relPath=msg.relPath;
+				this.relPath = msg.relPath;
 				this.loadCommits(msg.commits, msg.head, msg.tags, msg.moreCommitsAvailable, msg.onlyFollowFirstParent);
 			}
 		} else {
@@ -2027,10 +2028,10 @@ export class GitGraphView {
 		// 		cdvHeight=parseInt(cdv.style.height.replace("px",''))
 		// 	}
 		// }
-		const footHeight=58;
+		const footHeight = 58;
 		const content = document.getElementById('content')
 		// const height = window.innerHeight - 42 - cdvHeight;
-		const height = window.innerHeight - 42-footHeight;
+		const height = window.innerHeight - 42 - footHeight;
 		content!.style.height = height + "px";
 	}
 
@@ -2310,6 +2311,8 @@ export class GitGraphView {
 				}
 
 			} else if ((eventElem = eventTarget.closest('.commit')) !== null) {
+
+				this.mousePosition = { x: e.x, y: e.y }
 				// .commit was clicked
 				if (this.expandedCommit !== null) {
 					const commit = this.getCommitOfElem(eventElem);
@@ -2620,7 +2623,6 @@ export class GitGraphView {
 			elem = document.createElement(isDocked ? 'div' : 'tr');
 			elem.id = 'cdv';
 			elem.className = isDocked ? 'docked' : 'inline';
-			this.setCdvHeight(elem, isDocked);
 			if (isDocked) {
 				document.getElementById('footer')!.appendChild(elem);
 			} else {
@@ -2705,6 +2707,7 @@ export class GitGraphView {
 			}
 		}
 
+		this.setCdvHeight(elem, isDocked);
 		this.makeCdvResizable();
 		document.getElementById('cdvClose')!.addEventListener('click', () => {
 			this.closeCommitDetails(true);
@@ -2797,6 +2800,9 @@ export class GitGraphView {
 		let heightPx = height + 'px';
 		// elem.style.height = heightPx;
 		// if (isDocked) this.viewElem.style.bottom = heightPx;
+		console.log(elem.clientHeight)
+		elem.style.left = Math.min(window.innerWidth-400,(this.mousePosition.x+100)) + "px";
+		elem.style.top = Math.min(window.innerHeight-elem.clientHeight-10,Math.max(0,(this.mousePosition.y-80))) + "px";
 		this.setContentHeight(height)
 	}
 
