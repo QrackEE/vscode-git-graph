@@ -76,6 +76,7 @@ export declare const enum GitPushBranchMode {
 }
 export interface GitRepoConfig {
     readonly branches: GitRepoConfigBranches;
+    readonly authors: ActionedUser[];
     readonly diffTool: string | null;
     readonly guiDiffTool: string | null;
     readonly pushDefault: string | null;
@@ -242,6 +243,11 @@ export interface CommitDetailsViewConfig {
     readonly fileTreeCompactFolders: boolean;
     readonly fileViewType: FileViewType;
 }
+export interface ActionedUser{
+    name: string;
+    email: string;
+}
+
 export interface GraphConfig {
     readonly colours: ReadonlyArray<string>;
     readonly style: GraphStyle;
@@ -799,6 +805,8 @@ export interface RequestLoadCommits extends RepoRequest {
     readonly command: 'loadCommits';
     readonly refreshId: number;
     readonly branches: ReadonlyArray<string> | null;
+    readonly searchValue: string|null;
+    readonly author: string|null;
     readonly maxCommits: number;
     readonly showTags: boolean;
     readonly showRemoteBranches: boolean;

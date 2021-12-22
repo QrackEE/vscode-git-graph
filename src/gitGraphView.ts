@@ -44,10 +44,10 @@ export class GitGraphView extends Disposable {
 	 * @param logger The Git History Logger instance.
 	 * @param loadViewTo What to load the view to.
 	 */
-	public static createOrShow(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo,relPath?:string) {
+	public static createOrShow(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, relPath?: string) {
 		const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
 
-		const currentPanel=GitGraphView.panelMap[relPath+''];
+		const currentPanel = GitGraphView.panelMap[relPath + ''];
 		if (currentPanel) {
 			// If Git History panel already exists
 			if (currentPanel.isPanelVisible) {
@@ -62,7 +62,7 @@ export class GitGraphView extends Disposable {
 			currentPanel.panel.reveal(column);
 		} else {
 			// If Git History panel doesn't already exist
-			GitGraphView.panelMap[relPath+''] = new GitGraphView(extensionPath, dataSource, extensionState, avatarManager, repoManager, logger, loadViewTo, column,relPath);
+			GitGraphView.panelMap[relPath + ''] = new GitGraphView(extensionPath, dataSource, extensionState, avatarManager, repoManager, logger, loadViewTo, column, relPath);
 		}
 	}
 
@@ -77,7 +77,7 @@ export class GitGraphView extends Disposable {
 	 * @param loadViewTo What to load the view to.
 	 * @param column The column the view should be loaded in.
 	 */
-	private constructor(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, column: vscode.ViewColumn | undefined,readonly relPath?:string) {
+	private constructor(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, column: vscode.ViewColumn | undefined, readonly relPath?: string) {
 		super();
 		this.extensionPath = extensionPath;
 		this.avatarManager = avatarManager;
@@ -88,7 +88,7 @@ export class GitGraphView extends Disposable {
 		this.loadViewTo = loadViewTo;
 
 		const config = getConfig();
-		const title=relPath?`Git History(${path.basename(relPath)})`:'Git History';
+		const title = relPath ? `Git History(${path.basename(relPath)})` : 'Git History';
 		this.panel = vscode.window.createWebviewPanel('git-graph', title, column || vscode.ViewColumn.One, {
 			enableScripts: true,
 			localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media'))],
@@ -105,7 +105,7 @@ export class GitGraphView extends Disposable {
 		this.registerDisposables(
 			// Dispose Git History View resources when disposed
 			toDisposable(() => {
-				delete GitGraphView.panelMap[relPath+'']
+				delete GitGraphView.panelMap[relPath + '']
 				this.repoFileWatcher.stop();
 			}),
 
@@ -412,7 +412,7 @@ export class GitGraphView extends Disposable {
 					command: 'loadCommits',
 					refreshId: msg.refreshId,
 					onlyFollowFirstParent: msg.onlyFollowFirstParent,
-					...await this.dataSource.getCommits(msg.repo, msg.branches, msg.maxCommits, msg.showTags, msg.showRemoteBranches, msg.includeCommitsMentionedByReflogs, msg.onlyFollowFirstParent, msg.commitOrdering, msg.remotes, msg.hideRemotes, msg.stashes,this.relPath)
+					...await this.dataSource.getCommits(msg, this.relPath)
 				});
 				break;
 			case 'loadConfig':
@@ -723,6 +723,7 @@ export class GitGraphView extends Disposable {
 				<div id="controls">
 					<span id="repoControl"><span class="unselectable">Repo: </span><div id="repoDropdown" class="dropdown"></div></span>
 					<span id="branchControl"><span class="unselectable">Branch: </span><div id="branchDropdown" class="dropdown"></div></span>
+					<span id="authorControl"><span class="unselectable">Author: </span><div id="authorDropdown" class="dropdown"></div></span>
 					<label id="showRemoteBranchesControl"><input type="checkbox" id="showRemoteBranchesCheckbox" tabindex="-1"><span class="customCheckbox"></span>Show Remote Branches</label>
 					<div id="fetchBtn"></div>
 					<div id="terminalBtn" title="Open a Terminal for this Repository"></div>

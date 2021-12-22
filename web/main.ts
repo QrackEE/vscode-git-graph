@@ -33,6 +33,8 @@ export class GitGraphView {
 	private onlyFollowFirstParent: boolean = false;
 	private avatars: AvatarImageCollection = {};
 	private currentBranches: string[] | null = null;
+	private searchValue: string | null = null;
+	private currentAuthors: string[]=[];
 
 	private currentRepo!: string;
 	private currentRepoLoading: boolean = true;
@@ -66,6 +68,7 @@ export class GitGraphView {
 	private readonly settingsWidget: SettingsWidget;
 	private readonly repoDropdown: Dropdown;
 	private readonly branchDropdown: Dropdown;
+	private readonly authorDropdown: Dropdown;
 
 	private readonly viewElem: HTMLElement;
 	private readonly controlsElem: HTMLElement;
@@ -112,6 +115,14 @@ export class GitGraphView {
 			this.requestLoadRepoInfoAndCommits(true, true);
 		});
 
+		this.authorDropdown = new Dropdown('authorDropdown', false, false, 'Author', (values) => {
+			this.currentAuthors = values;
+			this.maxCommits = this.config.initialLoadCommits;
+			this.saveState();
+			this.clearCommits();
+			this.requestLoadRepoInfoAndCommits(true, true);
+		})
+
 		this.showRemoteBranchesElem = <HTMLInputElement>document.getElementById('showRemoteBranchesCheckbox')!;
 		this.showRemoteBranchesElem.addEventListener('change', () => {
 			this.saveRepoStateValue(this.currentRepo, 'showRemoteBranchesV2', this.showRemoteBranchesElem.checked ? GG.BooleanOverride.Enabled : GG.BooleanOverride.Disabled);
@@ -149,6 +160,7 @@ export class GitGraphView {
 			this.loadRepoInfo(prevState.gitBranches, prevState.gitBranchHead, prevState.gitRemotes, prevState.gitStashes, true);
 			this.loadCommits(prevState.commits, prevState.commitHead, prevState.gitTags, prevState.moreCommitsAvailable, prevState.onlyFollowFirstParent);
 			this.findWidget.restoreState(prevState.findWidget);
+			this.authorDropdown.setOptions(this.getAuthorOptions(), this.currentAuthors);
 			this.settingsWidget.restoreState(prevState.settingsWidget);
 			this.showRemoteBranchesElem.checked = getShowRemoteBranches(this.gitRepos[prevState.currentRepo].showRemoteBranchesV2);
 		}
@@ -513,9 +525,9 @@ export class GitGraphView {
 			this.gitConfig = msg.config;
 			this.checkRemote()
 			this.saveState();
-
 			this.renderCdvExternalDiffBtn();
 		}
+		this.authorDropdown.setOptions(this.getAuthorOptions(), this.currentAuthors);
 		this.settingsWidget.refresh();
 	}
 
@@ -557,6 +569,16 @@ export class GitGraphView {
 		}
 		for (let i = 0; i < this.gitBranches.length; i++) {
 			options.push({ name: this.gitBranches[i].indexOf('remotes/') === 0 ? this.gitBranches[i].substring(8) : this.gitBranches[i], value: this.gitBranches[i] });
+		}
+		return options;
+	}
+
+	public getAuthorOptions(): ReadonlyArray<DialogSelectInputOption> {
+		const options: DialogSelectInputOption[] = [];
+		options.push({ name: 'All', value: SHOW_ALL_BRANCHES });
+		for (let i = 0; i < this!.gitConfig!.authors.length; i++) {
+			const author = this!.gitConfig!.authors[i];
+			options.push({ name: author.name, value: author.name });
 		}
 		return options;
 	}
@@ -630,8 +652,10 @@ export class GitGraphView {
 		sendMessage({
 			command: 'loadCommits',
 			repo: this.currentRepo,
+			searchValue: this.searchValue,
 			refreshId: ++this.currentRepoRefreshState.loadCommitsRefreshId,
 			branches: this.currentBranches === null || (this.currentBranches.length === 1 && this.currentBranches[0] === SHOW_ALL_BRANCHES) ? null : this.currentBranches,
+			author: this.currentAuthors === null || (this.currentAuthors.length === 1 && this.currentAuthors[0] === SHOW_ALL_BRANCHES) ? null : this.currentAuthors[0],
 			maxCommits: this.maxCommits,
 			showTags: getShowTags(repoState.showTags),
 			showRemoteBranches: getShowRemoteBranches(repoState.showRemoteBranchesV2),
@@ -820,9 +844,9 @@ export class GitGraphView {
 
 		// Update the graphs grid dimensions
 		// this.config.graph.grid.expandY = expandedCommitElem !== null ? expandedCommitElem.getBoundingClientRect().height : cdvHeight;
-		this.config.graph.grid.expandY =  cdvHeight;
+		this.config.graph.grid.expandY = cdvHeight;
 		this.config.graph.grid.y = this.commits.length > 0 && this.tableElem.children.length > 0
-			? (this.tableElem.children[0].clientHeight - headerHeight - ( 0)) / this.commits.length
+			? (this.tableElem.children[0].clientHeight - headerHeight - (0)) / this.commits.length
 			: this.config.graph.grid.y;
 		this.config.graph.grid.offsetY = headerHeight + this.config.graph.grid.y / 2;
 
@@ -1133,7 +1157,7 @@ export class GitGraphView {
 			{
 				title: 'Add Tag' + ELLIPSIS,
 				visible: visibility.addTag,
-				onClick: (e) => {target.event=e;this.addTagAction(hash, '', this.config.dialogDefaults.addTag.type, '', null, target)}
+				onClick: (e) => { target.event = e; this.addTagAction(hash, '', this.config.dialogDefaults.addTag.type, '', null, target) }
 			}, {
 				title: 'Create Branch' + ELLIPSIS,
 				visible: visibility.createBranch,
@@ -1157,7 +1181,7 @@ export class GitGraphView {
 				title: 'Checkout' + (globalState.alwaysAcceptCheckoutCommit ? '' : ELLIPSIS),
 				visible: visibility.checkout,
 				onClick: (event) => {
-					target.event=event;
+					target.event = event;
 					const checkoutCommit = () => runAction({ command: 'checkoutCommit', repo: this.currentRepo, commitHash: hash }, 'Checking out Commit');
 					if (globalState.alwaysAcceptCheckoutCommit) {
 						checkoutCommit();
@@ -1174,7 +1198,7 @@ export class GitGraphView {
 				title: 'Cherry Pick' + ELLIPSIS,
 				visible: visibility.cherrypick,
 				onClick: (e) => {
-					target.event=e;
+					target.event = e;
 					const isMerge = commit.parents.length > 1;
 					let inputs: DialogInput[] = [];
 					if (isMerge) {
@@ -1218,7 +1242,7 @@ export class GitGraphView {
 				title: 'Revert' + ELLIPSIS,
 				visible: visibility.revert,
 				onClick: (e) => {
-					target.event=e;
+					target.event = e;
 					if (commit.parents.length > 1) {
 						let options = commit.parents.map((hash, index) => ({
 							name: abbrevCommit(hash) + (typeof this.commitLookup[hash] === 'number' ? ': ' + this.commits[this.commitLookup[hash]].message : ''),
@@ -1237,7 +1261,7 @@ export class GitGraphView {
 				title: 'Drop' + ELLIPSIS,
 				visible: visibility.drop && this.graph.dropCommitPossible(this.commitLookup[hash]),
 				onClick: (e) => {
-					target.event=e;
+					target.event = e;
 					dialog.showConfirmation('Are you sure you want to permanently drop commit <b><i>' + abbrevCommit(hash) + '</i></b>?' + (this.onlyFollowFirstParent ? '<br/><i>Note: By enabling "Only follow the first parent of commits", some commits may have been hidden from the Git History View that could affect the outcome of performing this action.</i>' : ''), 'Yes, drop', () => {
 						runAction({ command: 'dropCommit', repo: this.currentRepo, commitHash: hash }, 'Dropping Commit');
 					}, target);
@@ -1699,15 +1723,15 @@ export class GitGraphView {
 		runAction({ command: 'deleteTag', repo: this.currentRepo, tagName: refName, deleteOnRemote: deleteOnRemote }, 'Deleting Tag');
 	}
 
-	private checkRemote(){
-		const remoteHref=document.getElementById('openRemoteBtn') as HTMLLinkElement
-		const remotes=this?.gitConfig?.remotes;
-		if(remotes && remotes.length>0){
-			let url=remotes[0].url!;
-			if(url.startsWith("git@")){
-				url=url.replace(":","/").replace("git@","https://").replace(".git","")
+	private checkRemote() {
+		const remoteHref = document.getElementById('openRemoteBtn') as HTMLLinkElement
+		const remotes = this?.gitConfig?.remotes;
+		if (remotes && remotes.length > 0) {
+			let url = remotes[0].url!;
+			if (url.startsWith("git@")) {
+				url = url.replace(":", "/").replace("git@", "https://").replace(".git", "")
 			}
-			remoteHref.href=url;
+			remoteHref.href = url;
 		}
 	}
 
@@ -1741,7 +1765,7 @@ export class GitGraphView {
 	private makeTableResizable() {
 		console.log('makeTableResizable')
 		// let colHeadersElem = document.getElementById('tableColHeaders')!, cols = <HTMLCollectionOf<HTMLElement>>document.getElementsByClassName('tableColHeader');
-		let cols:HTMLCollectionOf<HTMLElement> = document.querySelectorAll('.commit td') as any;
+		let cols: HTMLCollectionOf<HTMLElement> = document.querySelectorAll('.commit td') as any;
 		let columnWidths: GG.ColumnWidth[], mouseX = -1, col = -1, colIndex = -1;
 
 		const makeTableFixedLayout = () => {
@@ -1983,9 +2007,9 @@ export class GitGraphView {
 
 	/* Observers */
 
-	private setContentHeight(cdvHeight:number=0) {
+	private setContentHeight(cdvHeight: number = 0) {
 		const content = document.getElementById('content')
-		const height = window.innerHeight  - 42 - cdvHeight;
+		const height = window.innerHeight - 42 - cdvHeight;
 		content!.style.height = height + "px";
 	}
 
@@ -3959,7 +3983,7 @@ export function getRepoDropdownOptions(repos: Readonly<GG.GitRepoSet>) {
 }
 
 export function runAction(msg: GG.RequestMessage, action?: string) {
-	if(action)
+	if (action)
 		dialog.showActionRunning(action);
 	sendMessage(msg);
 }

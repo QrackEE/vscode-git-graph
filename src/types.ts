@@ -89,6 +89,7 @@ export const enum GitPushBranchMode {
 
 export interface GitRepoConfig {
 	readonly branches: GitRepoConfigBranches;
+	readonly authors: ActionedUser[];
 	readonly diffTool: string | null;
 	readonly guiDiffTool: string | null;
 	readonly pushDefault: string | null;
@@ -902,6 +903,8 @@ export interface RequestLoadCommits extends RepoRequest {
 	readonly command: 'loadCommits';
 	readonly refreshId: number;
 	readonly branches: ReadonlyArray<string> | null; // null => Show All
+	readonly searchValue: string;
+    readonly author: string|undefined;
 	readonly maxCommits: number;
 	readonly showTags: boolean;
 	readonly showRemoteBranches: boolean;
@@ -1230,6 +1233,11 @@ export interface RequestViewDiffWithWorkingFile extends RepoRequest {
 export interface ResponseViewDiffWithWorkingFile extends ResponseWithErrorInfo {
 	readonly command: 'viewDiffWithWorkingFile';
 }
+
+export interface ActionedUser{
+    name: string;
+    email: string;
+};
 
 export interface RequestViewFileAtRevision extends RepoRequest {
 	readonly command: 'viewFileAtRevision';
