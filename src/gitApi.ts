@@ -1,5 +1,6 @@
-import { commands, extensions, window } from 'vscode';
-import { API, GitExtension } from './git';
+import { relative } from 'path';
+import { commands, extensions, Uri, window } from 'vscode';
+import { API, GitExtension, Repository } from './git';
 
 export class GitAPi {
 
@@ -26,10 +27,20 @@ export class GitAPi {
         return this.api;
     }
 
-    public static async quickSync() {
+    public static async getReport():Promise<Repository>{
         const gitApi = await GitAPi.getApi();
         const currentIndex = gitApi.repositories.length === 1 ? 0 : gitApi.repositories.findIndex(x => x.ui.selected);
-        const repo = gitApi.repositories[currentIndex];
+        return gitApi.repositories[currentIndex];
+    }
+
+    public static async getRelative(uri:Uri):Promise<string> {
+        const repo = await this.getReport();
+        const gitRoot=repo.rootUri.fsPath;
+        return relative(gitRoot, uri.fsPath).replace(/\\/g, '/');
+    }
+
+    public static async quickSync() {
+        const repo = await this.getReport();
         if (repo.state.workingTreeChanges.length > 0 || repo.state.indexChanges.length > 0) {
             if (!repo.inputBox.value) {
                 const confirm=await window.showQuickPick(["YES", "NO"], { placeHolder:"Are you want to quick sync?" })

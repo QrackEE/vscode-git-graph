@@ -48,6 +48,7 @@ export class CommandManager extends Disposable {
 
 		// Register Extension Commands
 		this.registerCommand('git-graph.view', (arg) => this.view(arg));
+		this.registerCommand('git-graph.viewFileHistory', (arg) => this.view(arg));
 		this.registerCommand('git-graph.addGitRepository', () => this.addGitRepository());
 		this.registerCommand('git-graph.removeGitRepository', () => this.removeGitRepository());
 		this.registerCommand('git-graph.clearAvatarCache', () => this.clearAvatarCache());
@@ -109,7 +110,11 @@ export class CommandManager extends Disposable {
 	private async view(arg: any) {
 		let loadRepo: string | null = null;
 
-		if (typeof arg === 'object' && arg.rootUri) {
+		let relPath = "";
+		if (arg instanceof vscode.Uri) {
+			relPath = await GitAPi.getRelative(arg)
+			console.log(relPath)
+		} else if (arg?.rootUri) {
 			// If command is run from the Visual Studio Code Source Control View, load the specific repo
 			const repoPath = getPathFromUri(arg.rootUri);
 			loadRepo = await this.repoManager.getKnownRepo(repoPath);
@@ -122,7 +127,7 @@ export class CommandManager extends Disposable {
 			loadRepo = this.repoManager.getRepoContainingFile(getPathFromUri(vscode.window.activeTextEditor.document.uri));
 		}
 
-		GitGraphView.createOrShow(this.context.extensionPath, this.dataSource, this.extensionState, this.avatarManager, this.repoManager, this.logger, loadRepo !== null ? { repo: loadRepo } : null);
+		GitGraphView.createOrShow(this.context.extensionPath, this.dataSource, this.extensionState, this.avatarManager, this.repoManager, this.logger, loadRepo !== null ? { repo: loadRepo } : null,relPath);
 	}
 
 	/**

@@ -1739,7 +1739,8 @@ export class GitGraphView {
 	/* Table Utils */
 
 	private makeTableResizable() {
-		let colHeadersElem = document.getElementById('tableColHeaders')!, cols = <HTMLCollectionOf<HTMLElement>>document.getElementsByClassName('tableColHeader');
+		// let colHeadersElem = document.getElementById('tableColHeaders')!, cols = <HTMLCollectionOf<HTMLElement>>document.getElementsByClassName('tableColHeader');
+		let cols:HTMLCollectionOf<HTMLElement> = document.querySelectorAll('.commit td') as any;
 		let columnWidths: GG.ColumnWidth[], mouseX = -1, col = -1, colIndex = -1;
 
 		const makeTableFixedLayout = () => {
@@ -1845,64 +1846,64 @@ export class GitGraphView {
 			eventOverlay.create('colResize', processResizingColumn, stopResizingColumn);
 		});
 
-		colHeadersElem.addEventListener('contextmenu', (e: MouseEvent) => {
-			handledEvent(e);
+		// colHeadersElem.addEventListener('contextmenu', (e: MouseEvent) => {
+		// 	handledEvent(e);
 
-			const toggleColumnState = (col: number, defaultWidth: number) => {
-				columnWidths[col] = columnWidths[col] !== COLUMN_HIDDEN ? COLUMN_HIDDEN : columnWidths[0] === COLUMN_AUTO ? COLUMN_AUTO : defaultWidth - COLUMN_LEFT_RIGHT_PADDING;
-				this.saveColumnWidths(columnWidths);
-				this.render();
-			};
+		// 	const toggleColumnState = (col: number, defaultWidth: number) => {
+		// 		columnWidths[col] = columnWidths[col] !== COLUMN_HIDDEN ? COLUMN_HIDDEN : columnWidths[0] === COLUMN_AUTO ? COLUMN_AUTO : defaultWidth - COLUMN_LEFT_RIGHT_PADDING;
+		// 		this.saveColumnWidths(columnWidths);
+		// 		this.render();
+		// 	};
 
-			const commitOrdering = getCommitOrdering(this.gitRepos[this.currentRepo].commitOrdering);
-			const changeCommitOrdering = (repoCommitOrdering: GG.RepoCommitOrdering) => {
-				this.saveRepoStateValue(this.currentRepo, 'commitOrdering', repoCommitOrdering);
-				this.refresh(true);
-			};
+		// 	const commitOrdering = getCommitOrdering(this.gitRepos[this.currentRepo].commitOrdering);
+		// 	const changeCommitOrdering = (repoCommitOrdering: GG.RepoCommitOrdering) => {
+		// 		this.saveRepoStateValue(this.currentRepo, 'commitOrdering', repoCommitOrdering);
+		// 		this.refresh(true);
+		// 	};
 
-			contextMenu.show([
-				[
-					{
-						title: 'Date',
-						visible: true,
-						checked: columnWidths[2] !== COLUMN_HIDDEN,
-						onClick: () => toggleColumnState(2, 128)
-					},
-					{
-						title: 'Author',
-						visible: true,
-						checked: columnWidths[3] !== COLUMN_HIDDEN,
-						onClick: () => toggleColumnState(3, 128)
-					},
-					{
-						title: 'Commit',
-						visible: true,
-						checked: columnWidths[4] !== COLUMN_HIDDEN,
-						onClick: () => toggleColumnState(4, 80)
-					}
-				],
-				[
-					{
-						title: 'Commit Timestamp Order',
-						visible: true,
-						checked: commitOrdering === GG.CommitOrdering.Date,
-						onClick: () => changeCommitOrdering(GG.RepoCommitOrdering.Date)
-					},
-					{
-						title: 'Author Timestamp Order',
-						visible: true,
-						checked: commitOrdering === GG.CommitOrdering.AuthorDate,
-						onClick: () => changeCommitOrdering(GG.RepoCommitOrdering.AuthorDate)
-					},
-					{
-						title: 'Topological Order',
-						visible: true,
-						checked: commitOrdering === GG.CommitOrdering.Topological,
-						onClick: () => changeCommitOrdering(GG.RepoCommitOrdering.Topological)
-					}
-				]
-			], true, null, e, this.viewElem);
-		});
+		// 	contextMenu.show([
+		// 		[
+		// 			{
+		// 				title: 'Date',
+		// 				visible: true,
+		// 				checked: columnWidths[2] !== COLUMN_HIDDEN,
+		// 				onClick: () => toggleColumnState(2, 128)
+		// 			},
+		// 			{
+		// 				title: 'Author',
+		// 				visible: true,
+		// 				checked: columnWidths[3] !== COLUMN_HIDDEN,
+		// 				onClick: () => toggleColumnState(3, 128)
+		// 			},
+		// 			{
+		// 				title: 'Commit',
+		// 				visible: true,
+		// 				checked: columnWidths[4] !== COLUMN_HIDDEN,
+		// 				onClick: () => toggleColumnState(4, 80)
+		// 			}
+		// 		],
+		// 		[
+		// 			{
+		// 				title: 'Commit Timestamp Order',
+		// 				visible: true,
+		// 				checked: commitOrdering === GG.CommitOrdering.Date,
+		// 				onClick: () => changeCommitOrdering(GG.RepoCommitOrdering.Date)
+		// 			},
+		// 			{
+		// 				title: 'Author Timestamp Order',
+		// 				visible: true,
+		// 				checked: commitOrdering === GG.CommitOrdering.AuthorDate,
+		// 				onClick: () => changeCommitOrdering(GG.RepoCommitOrdering.AuthorDate)
+		// 			},
+		// 			{
+		// 				title: 'Topological Order',
+		// 				visible: true,
+		// 				checked: commitOrdering === GG.CommitOrdering.Topological,
+		// 				onClick: () => changeCommitOrdering(GG.RepoCommitOrdering.Topological)
+		// 			}
+		// 		]
+		// 	], true, null, e, this.viewElem);
+		// });
 	}
 
 	public getColumnVisibility() {

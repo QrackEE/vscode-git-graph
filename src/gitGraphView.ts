@@ -16,7 +16,7 @@ const remoteIcon = `<svg stroke="currentColor" fill="currentColor" stroke-width=
  * Manages the Git History View.
  */
 export class GitGraphView extends Disposable {
-	public static currentPanel: GitGraphView | undefined;
+	public static panelMap: { [key: string]: GitGraphView } = {};
 
 	private readonly panel: vscode.WebviewPanel;
 	private readonly extensionPath: string;
@@ -44,24 +44,25 @@ export class GitGraphView extends Disposable {
 	 * @param logger The Git History Logger instance.
 	 * @param loadViewTo What to load the view to.
 	 */
-	public static createOrShow(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo) {
+	public static createOrShow(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo,relPath?:string) {
 		const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
 
-		if (GitGraphView.currentPanel) {
+		const currentPanel=GitGraphView.panelMap[relPath+''];
+		if (currentPanel) {
 			// If Git History panel already exists
-			if (GitGraphView.currentPanel.isPanelVisible) {
+			if (currentPanel.isPanelVisible) {
 				// If the Git History panel is visible
 				if (loadViewTo !== null) {
-					GitGraphView.currentPanel.respondLoadRepos(repoManager.getRepos(), loadViewTo);
+					currentPanel.respondLoadRepos(repoManager.getRepos(), loadViewTo);
 				}
 			} else {
 				// If the Git History panel is not visible
-				GitGraphView.currentPanel.loadViewTo = loadViewTo;
+				currentPanel.loadViewTo = loadViewTo;
 			}
-			GitGraphView.currentPanel.panel.reveal(column);
+			currentPanel.panel.reveal(column);
 		} else {
 			// If Git History panel doesn't already exist
-			GitGraphView.currentPanel = new GitGraphView(extensionPath, dataSource, extensionState, avatarManager, repoManager, logger, loadViewTo, column);
+			GitGraphView.panelMap[relPath+''] = new GitGraphView(extensionPath, dataSource, extensionState, avatarManager, repoManager, logger, loadViewTo, column,relPath);
 		}
 	}
 
@@ -76,7 +77,7 @@ export class GitGraphView extends Disposable {
 	 * @param loadViewTo What to load the view to.
 	 * @param column The column the view should be loaded in.
 	 */
-	private constructor(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, column: vscode.ViewColumn | undefined) {
+	private constructor(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, column: vscode.ViewColumn | undefined,readonly relPath?:string) {
 		super();
 		this.extensionPath = extensionPath;
 		this.avatarManager = avatarManager;
@@ -87,7 +88,8 @@ export class GitGraphView extends Disposable {
 		this.loadViewTo = loadViewTo;
 
 		const config = getConfig();
-		this.panel = vscode.window.createWebviewPanel('git-graph', 'Git History', column || vscode.ViewColumn.One, {
+		const title=relPath?`Git History(${path.basename(relPath)})`:'Git History';
+		this.panel = vscode.window.createWebviewPanel('git-graph', title, column || vscode.ViewColumn.One, {
 			enableScripts: true,
 			localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media'))],
 			retainContextWhenHidden: config.retainContextWhenHidden
@@ -103,7 +105,7 @@ export class GitGraphView extends Disposable {
 		this.registerDisposables(
 			// Dispose Git History View resources when disposed
 			toDisposable(() => {
-				GitGraphView.currentPanel = undefined;
+				delete GitGraphView.panelMap[relPath+'']
 				this.repoFileWatcher.stop();
 			}),
 
@@ -410,7 +412,7 @@ export class GitGraphView extends Disposable {
 					command: 'loadCommits',
 					refreshId: msg.refreshId,
 					onlyFollowFirstParent: msg.onlyFollowFirstParent,
-					...await this.dataSource.getCommits(msg.repo, msg.branches, msg.maxCommits, msg.showTags, msg.showRemoteBranches, msg.includeCommitsMentionedByReflogs, msg.onlyFollowFirstParent, msg.commitOrdering, msg.remotes, msg.hideRemotes, msg.stashes)
+					...await this.dataSource.getCommits(msg.repo, msg.branches, msg.maxCommits, msg.showTags, msg.showRemoteBranches, msg.includeCommitsMentionedByReflogs, msg.onlyFollowFirstParent, msg.commitOrdering, msg.remotes, msg.hideRemotes, msg.stashes,this.relPath)
 				});
 				break;
 			case 'loadConfig':
