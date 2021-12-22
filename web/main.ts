@@ -2021,14 +2021,16 @@ export class GitGraphView {
 	/* Observers */
 
 	private setContentHeight(cdvHeight: number = 0) {
-		if(!cdvHeight){
-			const cdv=document.getElementById('cdv')
-			if(cdv){
-				cdvHeight=parseInt(cdv.style.height.replace("px",''))
-			}
-		}
+		// if(!cdvHeight){
+		// 	const cdv=document.getElementById('cdv')
+		// 	if(cdv){
+		// 		cdvHeight=parseInt(cdv.style.height.replace("px",''))
+		// 	}
+		// }
+		const footHeight=58;
 		const content = document.getElementById('content')
-		const height = window.innerHeight - 42 - cdvHeight;
+		// const height = window.innerHeight - 42 - cdvHeight;
+		const height = window.innerHeight - 42-footHeight;
 		content!.style.height = height + "px";
 	}
 
@@ -2793,7 +2795,7 @@ export class GitGraphView {
 		}
 
 		let heightPx = height + 'px';
-		elem.style.height = heightPx;
+		// elem.style.height = heightPx;
 		// if (isDocked) this.viewElem.style.bottom = heightPx;
 		this.setContentHeight(height)
 	}

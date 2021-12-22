@@ -314,9 +314,12 @@ code{
 #cdv.docked{
 	display:block;
 	position:fixed;
-	left:0;
-	right:0;
-	bottom:0;
+	/* left:0; */
+	/* bottom:0; */
+	right: 17px;
+    top: 50px;
+	width: 400px;
+	box-shadow: 1px 1px 7px 0px #888888;
 	background-color: var(--vscode-editor-background);
 	/* background-color:rgba(128,128,128,0.1); */
 	font-size:13px;
@@ -325,9 +328,16 @@ code{
 	cursor:default;
 }
 #cdvContent{
-	position:absolute;
+	/* position:absolute; */
+	min-height: 200px;
+	max-height: 800px;
+	overflow: scroll;
 	left:0;
 	right:32px;
+}
+
+#cdvContent::-webkit-scrollbar {
+    display: none;
 }
 
 #cdvControls{
@@ -390,7 +400,7 @@ code{
 }
 
 #cdvSummary, #cdvFiles, #cdvLoading{
-	position:absolute;
+	/* position:absolute; */
 	top:0;
 	bottom:0;
 	box-sizing:border-box;
@@ -411,6 +421,7 @@ code{
 	text-overflow:ellipsis;
 	-webkit-user-select:text;
 	user-select:text;
+	display: none;
 }
 
 .cdvSummaryTop{
@@ -463,7 +474,8 @@ code{
 }
 
 #cdvFiles{
-	left:50%;
+	/* left:50%; */
+	left:0 !important;
 	right:0;
 	padding:4px 8px 8px 0;
 	-webkit-user-select:none;
