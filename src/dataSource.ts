@@ -35,7 +35,7 @@ const GPG_STATUS_CODE_PARSING_DETAILS: Readonly<{ [statusCode: string]: GpgStatu
 };
 
 /**
- * Interfaces Git History with the Git executable to provide all Git integrations.
+ * Interfaces Git Graph with the Git executable to provide all Git integrations.
  */
 export class DataSource extends Disposable {
 	private readonly logger: Logger;
@@ -47,10 +47,10 @@ export class DataSource extends Disposable {
 	private gitFormatStash!: string;
 
 	/**
-	 * Creates the Git History Data Source.
-	 * @param gitExecutable The Git executable available to Git History at startup.
-	 * @param onDidChangeGitExecutable The Event emitting the Git executable for Git History to use.
-	 * @param logger The Git History Logger instance.
+	 * Creates the Git Graph Data Source.
+	 * @param gitExecutable The Git executable available to Git Graph at startup.
+	 * @param onDidChangeGitExecutable The Event emitting the Git executable for Git Graph to use.
+	 * @param logger The Git Graph Logger instance.
 	 */
 	constructor(gitExecutable: GitExecutable | null, onDidChangeConfiguration: Event<vscode.ConfigurationChangeEvent>, onDidChangeGitExecutable: Event<GitExecutable>, logger: Logger) {
 		super();
@@ -273,7 +273,7 @@ export class DataSource extends Disposable {
 	}
 
 	/**
-	 * Get various Git config variables for a repository that are consumed by the Git History View.
+	 * Get various Git config variables for a repository that are consumed by the Git Graph View.
 	 * @param repo The path of the repository.
 	 * @param remotes An array of known remotes.
 	 * @returns The config data.
@@ -421,7 +421,7 @@ export class DataSource extends Disposable {
 	 * @returns The comparison details.
 	 */
 	public getCommitComparison(repo: string, fromHash: string, toHash: string): Promise<GitCommitComparisonData> {
-		return Promise.all<DiffNameStatusRecord[], DiffNumStatRecord[], GitStatusFiles | null>([
+		return Promise.all([
 			this.getDiffNameStatus(repo, fromHash, toHash === UNCOMMITTED ? '' : toHash),
 			this.getDiffNumStat(repo, fromHash, toHash === UNCOMMITTED ? '' : toHash),
 			toHash === UNCOMMITTED ? this.getStatus(repo) : Promise.resolve(null)
@@ -1666,7 +1666,7 @@ export class DataSource extends Disposable {
 				parsingDetails = GPG_STATUS_CODE_PARSING_DETAILS[records[i][1]];
 				if (parsingDetails) {
 					if (signature !== null) {
-						throw new Error('Multiple Signatures Exist: As Git currently doesn\'t support them, nor does Git History (for consistency).');
+						throw new Error('Multiple Signatures Exist: As Git currently doesn\'t support them, nor does Git Graph (for consistency).');
 					} else {
 						signature = {
 							status: parsingDetails.status,
@@ -1792,10 +1792,10 @@ export class DataSource extends Disposable {
 	}
 
 	/**
-	 * Run a Git command (typically for a Git History View action).
+	 * Run a Git command (typically for a Git Graph View action).
 	 * @param args The arguments to pass to Git.
 	 * @param repo The repository to run the command in.
-	 * @returns The returned ErrorInfo (suitable for being sent to the Git History View).
+	 * @returns The returned ErrorInfo (suitable for being sent to the Git Graph View).
 	 */
 	private runGitCommand(args: string[], repo: string): Promise<ErrorInfo> {
 		return this._spawnGit(args, repo, () => null).catch((errorMessage: string) => errorMessage);
