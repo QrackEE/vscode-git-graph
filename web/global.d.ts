@@ -47,6 +47,7 @@ declare global {
 	}
 
 	interface WebViewState {
+		readonly mousePosition: {x:number,y:number};
 		readonly currentRepo: string;
 		readonly currentRepoLoading: boolean;
 		readonly gitRepos: GG.GitRepoSet;

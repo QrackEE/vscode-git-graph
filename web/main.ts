@@ -164,6 +164,7 @@ export class GitGraphView {
 		this.observeTableEvents();
 
 		if (prevState && !prevState.currentRepoLoading && typeof this.gitRepos[prevState.currentRepo] !== 'undefined') {
+			this.mousePosition = prevState.mousePosition;
 			this.currentRepo = prevState.currentRepo;
 			this.currentBranches = prevState.currentBranches;
 			this.maxCommits = prevState.maxCommits;
@@ -770,6 +771,7 @@ export class GitGraphView {
 		}
 
 		VSCODE_API.setState({
+			mousePosition: this.mousePosition,
 			currentRepo: this.currentRepo,
 			currentRepoLoading: this.currentRepoLoading,
 			gitRepos: this.gitRepos,
@@ -2788,6 +2790,7 @@ export class GitGraphView {
 	}
 
 	private setCdvHeight(elem: HTMLElement, isDocked: boolean) {
+		console.log(this.mousePosition)
 		let height = this.gitRepos[this.currentRepo].cdvHeight, windowHeight = window.innerHeight;
 		if (height > windowHeight - 40) {
 			height = Math.max(windowHeight - 40, 100);
@@ -2800,7 +2803,6 @@ export class GitGraphView {
 		let heightPx = height + 'px';
 		// elem.style.height = heightPx;
 		// if (isDocked) this.viewElem.style.bottom = heightPx;
-		console.log(elem.clientHeight)
 		elem.style.left = Math.min(window.innerWidth-400,(this.mousePosition.x+100)) + "px";
 		elem.style.top = Math.min(window.innerHeight-elem.clientHeight-10,Math.max(0,(this.mousePosition.y-80))) + "px";
 		this.setContentHeight(height)
