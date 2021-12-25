@@ -4,6 +4,7 @@ import { AvatarManager } from './avatarManager';
 import { getConfig } from './config';
 import { DataSource, GitConfigKey } from './dataSource';
 import { ExtensionState } from './extensionState';
+import { GitAPi } from './gitApi';
 import { Logger } from './logger';
 import { RepoFileWatcher } from './repoFileWatcher';
 import { RepoManager } from './repoManager';
@@ -44,10 +45,10 @@ export class GitGraphView extends Disposable {
 	 * @param logger The Git History Logger instance.
 	 * @param loadViewTo What to load the view to.
 	 */
-	public static createOrShow(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, relPath?: string) {
+	public static createOrShow(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, fileUri?: vscode.Uri) {
 		const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
 
-		const currentPanel = GitGraphView.panelMap[relPath + ''];
+		const currentPanel = GitGraphView.panelMap[fileUri + ''];
 		if (currentPanel) {
 			// If Git History panel already exists
 			if (currentPanel.isPanelVisible) {
@@ -62,7 +63,7 @@ export class GitGraphView extends Disposable {
 			currentPanel.panel.reveal(column);
 		} else {
 			// If Git History panel doesn't already exist
-			GitGraphView.panelMap[relPath + ''] = new GitGraphView(extensionPath, dataSource, extensionState, avatarManager, repoManager, logger, loadViewTo, column, relPath);
+			GitGraphView.panelMap[fileUri + ''] = new GitGraphView(extensionPath, dataSource, extensionState, avatarManager, repoManager, logger, loadViewTo, column, fileUri);
 		}
 	}
 
@@ -77,7 +78,7 @@ export class GitGraphView extends Disposable {
 	 * @param loadViewTo What to load the view to.
 	 * @param column The column the view should be loaded in.
 	 */
-	private constructor(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, column: vscode.ViewColumn | undefined, readonly relPath?: string) {
+	private constructor(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, column: vscode.ViewColumn | undefined, readonly fileUri?: vscode.Uri) {
 		super();
 		this.extensionPath = extensionPath;
 		this.avatarManager = avatarManager;
@@ -88,7 +89,11 @@ export class GitGraphView extends Disposable {
 		this.loadViewTo = loadViewTo;
 
 		const config = getConfig();
-		const title = relPath ? `Git History(${path.basename(relPath)})` : 'Git History';
+		const title = fileUri ? `Git History(${path.basename(fileUri.fsPath)})` : 'Git History';
+		const activePath = vscode.window.activeTextEditor?.document?.uri?.fsPath;
+		if (activePath == fileUri?.fsPath) {
+			column = vscode.ViewColumn.Two
+		}
 		this.panel = vscode.window.createWebviewPanel('git-graph', title, column || vscode.ViewColumn.One, {
 			enableScripts: true,
 			localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media'))],
@@ -105,7 +110,7 @@ export class GitGraphView extends Disposable {
 		this.registerDisposables(
 			// Dispose Git History View resources when disposed
 			toDisposable(() => {
-				delete GitGraphView.panelMap[relPath + '']
+				delete GitGraphView.panelMap[fileUri + '']
 				this.repoFileWatcher.stop();
 			}),
 
@@ -408,11 +413,12 @@ export class GitGraphView extends Disposable {
 				break;
 			case 'loadCommits':
 				this.loadCommitsRefreshId = msg.refreshId;
+				const relPath = this.fileUri ? await GitAPi.getRelative(this.fileUri) : undefined;
 				this.sendMessage({
 					command: 'loadCommits',
 					refreshId: msg.refreshId,
 					onlyFollowFirstParent: msg.onlyFollowFirstParent,
-					...await this.dataSource.getCommits(msg, this.relPath)
+					...await this.dataSource.getCommits(msg, relPath)
 				});
 				break;
 			case 'loadConfig':

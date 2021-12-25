@@ -428,8 +428,9 @@ export function viewDiff(repo: string, fromHash: string, toHash: string, oldFile
 
 		return vscode.commands.executeCommand('vscode.diff', encodeDiffDocUri(repo, oldFilePath, fromHash === toHash ? fromHash + '^' : fromHash, type, DiffSide.Old), encodeDiffDocUri(repo, newFilePath, toHash, type, DiffSide.New), title, {
 			preview: true,
-			viewColumn: getConfig().openNewTabEditorGroup
-		}).then(
+			// viewColumn: getConfig().openNewTabEditorGroup
+			viewColumn:vscode.ViewColumn.One
+		} as vscode.TextDocumentShowOptions).then(
 			() => null,
 			() => 'Visual Studio Code was unable to load the diff editor for ' + newFilePath + '.'
 		);
