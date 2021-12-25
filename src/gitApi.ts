@@ -27,20 +27,20 @@ export class GitAPi {
         return this.api;
     }
 
-    public static async getReport():Promise<Repository>{
+    public static async getRepo():Promise<Repository>{
         const gitApi = await GitAPi.getApi();
         const currentIndex = gitApi.repositories.length === 1 ? 0 : gitApi.repositories.findIndex(x => x.ui.selected);
         return gitApi.repositories[currentIndex];
     }
 
     public static async getRelative(uri:Uri):Promise<string> {
-        const repo = await this.getReport();
+        const repo = await this.getRepo();
         const gitRoot=repo.rootUri.fsPath;
         return relative(gitRoot, uri.fsPath).replace(/\\/g, '/');
     }
 
     public static async quickSync() {
-        const repo = await this.getReport();
+        const repo = await this.getRepo();
         if (repo.state.workingTreeChanges.length > 0 || repo.state.indexChanges.length > 0) {
             if (!repo.inputBox.value) {
                 const confirm=await window.showQuickPick(["YES", "NO"], { placeHolder:"Are you want to quick sync?" })

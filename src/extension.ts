@@ -47,7 +47,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	const diffDocProvider = new DiffDocProvider(dataSource);
 
 	context.subscriptions.push(
-		vscode.workspace.registerTextDocumentContentProvider(DiffDocProvider.scheme, diffDocProvider),
+		vscode.workspace.registerFileSystemProvider(DiffDocProvider.scheme, diffDocProvider,{
+			isCaseSensitive: true,
+			isReadonly: true,
+		}),
 		vscode.workspace.onDidChangeConfiguration((event) => {
 			if (event.affectsConfiguration('git-graph')) {
 				configurationEmitter.emit(event);

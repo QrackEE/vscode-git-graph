@@ -1,10 +1,10 @@
 import * as cp from 'child_process';
 import * as fs from 'fs';
-import { decode, encodingExists } from 'iconv-lite';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { AskpassEnvironment, AskpassManager } from './askpass/askpassManager';
 import { getConfig } from './config';
+import { GitAPi } from './gitApi';
 import { Logger } from './logger';
 import { RequestLoadCommits, ActionedUser, CommitOrdering, DateType, DeepWriteable, ErrorInfo, ErrorInfoExtensionPrefix, GitCommit, GitCommitDetails, GitCommitStash, GitConfigLocation, GitFileChange, GitFileStatus, GitPushBranchMode, GitRepoConfig, GitRepoConfigBranches, GitResetMode, GitSignature, GitSignatureStatus, GitStash, GitTagDetails, MergeActionOn, RebaseActionOn, SquashMessageFormat, TagType, Writeable } from './types';
 import { GitExecutable, GitVersionRequirement, UNABLE_TO_FIND_GIT_MSG, UNCOMMITTED, abbrevCommit, constructIncompatibleGitVersionMessage, doesVersionMeetRequirement, getPathFromStr, getPathFromUri, openGitTerminal, pathWithTrailingSlash, realpath, resolveSpawnOutput, showErrorMessage } from './utils';
@@ -446,11 +446,9 @@ export class DataSource extends Disposable {
 	 * @param filePath The path of the file relative to the repositories root.
 	 * @returns The file contents.
 	 */
-	public getCommitFile(repo: string, commitHash: string, filePath: string) {
-		return this._spawnGit(['show', commitHash + ':' + filePath], repo, stdout => {
-			const encoding = getConfig(repo).fileEncoding;
-			return decode(stdout, encodingExists(encoding) ? encoding : 'utf8');
-		});
+	public async getCommitFile(repo: string, commitHash: string, filePath: string) {
+		const repository = await GitAPi.getRepo()
+		return repository.buffer(commitHash, path.join(repository.rootUri.fsPath,filePath));
 	}
 
 
@@ -1559,10 +1557,10 @@ export class DataSource extends Disposable {
 		if (onlyFollowFirstParent) {
 			args.push('--first-parent');
 		}
-		if(author){
+		if (author) {
 			args.push(`--author=${author}`)
 		}
-		if(searchValue){
+		if (searchValue) {
 			args.push(`--grep=${searchValue}`)
 		}
 		if (branches !== null) {
