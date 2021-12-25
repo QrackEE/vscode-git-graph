@@ -596,8 +596,10 @@ code{
 }
 svg.openFolderIcon, svg.closedFolderIcon, svg.fileIcon, .fileTreeFileAction svg, #cdvLastFileViewed svg{
 	position:absolute;
-	top:2.5px;
-	height:13px !important;
+	/* top:2.5px; */
+	width: 14px;
+    height: 16px !important;
+	/* height:13px !important; */
 	fill:var(--vscode-editor-foreground);
 	fill-opacity:0.6;
 }
@@ -605,7 +607,7 @@ svg.openFolderIcon, svg.closedFolderIcon, svg.fileIcon, .fileTreeFileAction svg,
 	top:3px;
 }
 .fileTreeFileAction.viewGitFileAtRevision svg, .fileTreeFileAction.openGitFile svg{
-	top:4px;
+	/* top:4px; */
 }
 .fileTreeFolder:hover svg.openFolderIcon, .fileTreeFolder:hover svg.closedFolderIcon, .fileTreeFileRecord:hover svg.fileIcon, .fileTreeFileRecord.contextMenuActive svg.fileIcon, .fileTreeFileRecord.dialogActive svg.fileIcon, .fileTreeFileRecord:hover #cdvLastFileViewed svg, .fileTreeFileRecord.contextMenuActive #cdvLastFileViewed svg, .fileTreeFileRecord.dialogActive #cdvLastFileViewed svg, .fileTreeRepo:hover svg, .fileTreeFileAction:hover svg{
 	fill-opacity:0.8;
