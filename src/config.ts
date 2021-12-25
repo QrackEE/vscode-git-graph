@@ -489,7 +489,7 @@ class Config {
 	 * Get the value of the `git-graph.repository.showUncommittedChanges` Extension Setting.
 	 */
 	get showUncommittedChanges() {
-		return !!this.getRenamedExtensionSetting('repository.showUncommittedChanges', 'showUncommittedChanges', true);
+		return !!this.getRenamedExtensionSetting('repository.showUncommittedChanges', 'showUncommittedChanges', false);
 	}
 
 	/**
