@@ -94,7 +94,10 @@ export class GitGraphView extends Disposable {
 		if (activePath == fileUri?.fsPath) {
 			column = vscode.ViewColumn.Two
 		}
-		this.panel = vscode.window.createWebviewPanel('git-graph', title, column || vscode.ViewColumn.One, {
+		this.panel = vscode.window.createWebviewPanel('git-graph', title, {
+			viewColumn: column || vscode.ViewColumn.One,
+			preserveFocus: true
+		}, {
 			enableScripts: true,
 			localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media'))],
 			retainContextWhenHidden: config.retainContextWhenHidden
