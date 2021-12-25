@@ -1169,7 +1169,13 @@ export class GitGraphView {
 				onClick: () => {
 					sendMessage({ command: 'copyToClipboard', type: 'Commit Hash', data: hash });
 				}
-			}, {
+			},{
+				title: 'Copy Commit Text',
+				visible: visibility.copyHash,
+				onClick: () => {
+					sendMessage({ command: 'copyToClipboard', type: 'Commit Hash', data: target.elem.innerText.split("\n")[1] });
+				}
+			},  {
 				title: 'Reset Branch' + ELLIPSIS,
 				visible: visibility.reset,
 				onClick: (event) => {
