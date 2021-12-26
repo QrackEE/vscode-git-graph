@@ -353,6 +353,12 @@ code{
 	height:24px;
 	cursor:pointer;
 }
+
+#cdvFileViewTypeList.active,
+#cdvFileViewTypeTree.active{
+	display: none;
+}
+
 .cdvControlBtn.active{
 	background-color:rgba(128,128,128,0.25);
 }
