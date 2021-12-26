@@ -2796,7 +2796,6 @@ export class GitGraphView {
 	}
 
 	private setCdvHeight(elem: HTMLElement, isDocked: boolean) {
-		console.log(this.mousePosition)
 		let height = this.gitRepos[this.currentRepo].cdvHeight, windowHeight = window.innerHeight;
 		if (height > windowHeight - 40) {
 			height = Math.max(windowHeight - 40, 100);
