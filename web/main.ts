@@ -30,6 +30,7 @@ export class GitGraphView {
 	private commits: GG.GitCommit[] = [];
 	private commitHead: string | null = null;
 	private relPath: string | undefined;
+	private contentScrollTop: number | undefined;
 	private filterCurrent: boolean = false;
 	private commitLookup: { [hash: string]: number } = {};
 	private onlyFollowFirstParent: boolean = false;
@@ -132,6 +133,11 @@ export class GitGraphView {
 			this.refresh(true);
 		});
 
+		window.onblur=()=>{
+			this!.contentScrollTop=document.getElementById('content')?.scrollTop
+			this.saveState()
+		}
+
 		const searchInput: HTMLInputElement = document.getElementById('searchInput') as any;
 		searchInput.placeholder = "Enter to search commit"
 		searchInput?.addEventListener("keypress", (e: any) => {
@@ -170,6 +176,7 @@ export class GitGraphView {
 			this.currentBranches = prevState.currentBranches;
 			this.maxCommits = prevState.maxCommits;
 			this.expandedCommit = prevState.expandedCommit;
+			this.contentScrollTop = prevState.contentScrollTop;
 			this.avatars = prevState.avatars;
 			this.gitConfig = prevState.gitConfig;
 			this.loadRepoInfo(prevState.gitBranches, prevState.gitBranchHead, prevState.gitRemotes, prevState.gitStashes, true);
@@ -786,6 +793,7 @@ export class GitGraphView {
 			commitHead: this.commitHead,
 			avatars: this.avatars,
 			currentBranches: this.currentBranches,
+			contentScrollTop: this.contentScrollTop,
 			moreCommitsAvailable: this.moreCommitsAvailable,
 			maxCommits: this.maxCommits,
 			onlyFollowFirstParent: this.onlyFollowFirstParent,
@@ -871,6 +879,7 @@ export class GitGraphView {
 	}
 
 	private renderTable() {
+		console.log(this.contentScrollTop)
 		const colVisibility = this.getColumnVisibility();
 		const currentHash = this.commits.length > 0 && this.commits[0].hash === UNCOMMITTED ? UNCOMMITTED : this.commitHead;
 		const vertexColours = this.graph.getVertexColours();
@@ -983,6 +992,9 @@ export class GitGraphView {
 					}
 				}
 			}
+		}
+		if(this.contentScrollTop){
+			document.getElementById('content')!.scrollTop=this.contentScrollTop!
 		}
 	}
 
