@@ -42,7 +42,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const dataSource = new DataSource(gitExecutable, onDidChangeConfiguration, onDidChangeGitExecutable, logger);
 	const avatarManager = new AvatarManager(dataSource, extensionState, logger);
 	const repoManager = new RepoManager(dataSource, extensionState, onDidChangeConfiguration, logger);
-	const statusBarItem = new StatusBarItem(repoManager.getNumRepos(), repoManager.onDidChangeRepos, onDidChangeConfiguration, logger);
+	// const statusBarItem = new StatusBarItem(repoManager.getNumRepos(), repoManager.onDidChangeRepos, onDidChangeConfiguration, logger);
 	const commandManager = new CommandManager(context, avatarManager, dataSource, extensionState, repoManager, gitExecutable, onDidChangeGitExecutable, logger);
 	const diffDocProvider = new DiffDocProvider(dataSource);
 
@@ -73,7 +73,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		}),
 		diffDocProvider,
 		commandManager,
-		statusBarItem,
+		// statusBarItem,
 		repoManager,
 		avatarManager,
 		dataSource,
