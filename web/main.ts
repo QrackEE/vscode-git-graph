@@ -2686,9 +2686,9 @@ export class GitGraphView {
 			html += '</div><div id="cdvFiles">' + generateFileViewHtml(tree!, expandedCommit.fileChanges!, expandedCommit.lastViewedFile, expandedCommit.contextMenuOpen.fileView, this.getFileViewType(), commitOrder.to === UNCOMMITTED) + '</div><div id="cdvDivider"></div>';
 		}
 		html += '</div><div id="cdvControls"><div id="cdvClose" class="cdvControlBtn" title="Close">' + SVG_ICONS.close + '</div>' +
-			(curFilePossible ? '<div id="cdvCurFile" class="cdvControlBtn">' + SVG_ICONS.file + '</div>' : '') +
-			(codeReviewPossible ? '<div id="cdvCodeReview" class="cdvControlBtn">' + SVG_ICONS.review + '</div>' : '') +
 			(!expandedCommit.loading ? '<div id="cdvFileViewTypeTree" class="cdvControlBtn cdvFileViewTypeBtn" title="File Tree View">' + SVG_ICONS.fileTree + '</div><div id="cdvFileViewTypeList" class="cdvControlBtn cdvFileViewTypeBtn" title="File List View">' + SVG_ICONS.fileList + '</div>' : '') +
+			(codeReviewPossible ? '<div id="cdvCodeReview" class="cdvControlBtn">' + SVG_ICONS.review + '</div>' : '') +
+			(curFilePossible ? '<div id="cdvCurFile" class="cdvControlBtn">' + SVG_ICONS.file + '</div>' : '') +
 			(externalDiffPossible ? '<div id="cdvExternalDiff" class="cdvControlBtn">' + SVG_ICONS.linkExternal + '</div>' : '') +
 			'</div><div class="cdvHeightResize"></div>';
 
@@ -2981,14 +2981,14 @@ export class GitGraphView {
 		if (this.filterCurrent) {
 			const tree = { ...folder }
 			for (const name in tree.contents) {
-				const path=parent?`${parent}/${name}`:name;
+				const path = parent ? `${parent}/${name}` : name;
 				if (path == this.relPath) {
 					tree.contents = { [name]: tree.contents[name] }
 					return tree;
 				}
 				const child = tree.contents[name];
 				if (child.type == 'folder') {
-					const matchChild = this.getFileTree(child, parent?`${parent}/${name}`:name)
+					const matchChild = this.getFileTree(child, parent ? `${parent}/${name}` : name)
 					if (matchChild) {
 						tree.contents = { [name]: matchChild }
 						return tree;
@@ -3223,7 +3223,7 @@ export class GitGraphView {
 					// 	onClick: () => triggerViewFileAtRevision(file, fileElem)
 					// },
 					{
-						title: 'View Diff with Working File',
+						title: 'Compare with Working File',
 						visible: visibility.viewDiffWithWorkingFile && fileExistsAtThisRevisionAndDiffPossible,
 						onClick: () => triggerViewFileDiffWithWorkingFile(file, fileElem)
 					}
