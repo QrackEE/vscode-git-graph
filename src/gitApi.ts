@@ -27,15 +27,15 @@ export class GitAPi {
         return this.api;
     }
 
-    public static async getRepo():Promise<Repository>{
+    public static async getRepo(): Promise<Repository> {
         const gitApi = await GitAPi.getApi();
         const currentIndex = gitApi.repositories.length === 1 ? 0 : gitApi.repositories.findIndex(x => x.ui.selected);
         return gitApi.repositories[currentIndex];
     }
 
-    public static async getRelative(uri:Uri):Promise<string> {
+    public static async getRelative(uri: Uri): Promise<string> {
         const repo = await this.getRepo();
-        const gitRoot=repo.rootUri.fsPath;
+        const gitRoot = repo.rootUri.fsPath;
         return relative(gitRoot, uri.fsPath).replace(/\\/g, '/');
     }
 
@@ -43,7 +43,7 @@ export class GitAPi {
         const repo = await this.getRepo();
         if (repo.state.workingTreeChanges.length > 0 || repo.state.indexChanges.length > 0) {
             if (!repo.inputBox.value) {
-                const confirm=await window.showQuickPick(["YES", "NO"], { placeHolder:"Are you want to quick sync?" })
+                const confirm = await window.showQuickPick(["YES", "NO"], { placeHolder: "Are you want to quick sync?", ignoreFocusOut: true })
                 if (confirm == "YES") {
                     repo.inputBox.value = 'Quick Sync'
                 }
@@ -53,7 +53,7 @@ export class GitAPi {
                     commands.executeCommand("git.sync")
                 });
             });
-        }else{
+        } else {
             commands.executeCommand("git.sync")
         }
     }
