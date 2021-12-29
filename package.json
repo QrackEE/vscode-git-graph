@@ -678,7 +678,7 @@
 						"Mixed - Keep working tree, but reset index",
 						"Hard - Discard all changes"
 					],
-					"default": "Mixed",
+					"default": "Soft",
 					"description": "Default mode to be used for the reset action."
 				},
 				"git-graph.dialog.resetUncommittedChanges.mode": {
