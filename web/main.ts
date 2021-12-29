@@ -1802,7 +1802,8 @@ export class GitGraphView {
 	private makeTableResizable() {
 		console.log('makeTableResizable')
 		// let colHeadersElem = document.getElementById('tableColHeaders')!, cols = <HTMLCollectionOf<HTMLElement>>document.getElementsByClassName('tableColHeader');
-		let cols: HTMLCollectionOf<HTMLElement> = document.querySelectorAll('.commit td') as any;
+		let cols: HTMLCollectionOf<HTMLElement> = document.querySelectorAll('#commitTable tr:nth-child(2) td') as any;
+		console.log(cols.length)
 		let columnWidths: GG.ColumnWidth[], mouseX = -1, col = -1, colIndex = -1;
 
 		const makeTableFixedLayout = () => {
