@@ -421,8 +421,8 @@ export function viewDiff(repo: string, fromHash: string, toHash: string, oldFile
 		let desc = fromHash === toHash
 			? fromHash === UNCOMMITTED
 				? 'Uncommitted'
-				: (type === GitFileStatus.Added ? 'Added in ' + abbrevToHash : type === GitFileStatus.Deleted ? 'Deleted in ' + abbrevToHash : abbrevFromHash + '^ ↔ ' + abbrevToHash)
-			: (type === GitFileStatus.Added ? 'Added between ' + abbrevFromHash + ' & ' + abbrevToHash : type === GitFileStatus.Deleted ? 'Deleted between ' + abbrevFromHash + ' & ' + abbrevToHash : abbrevFromHash + ' ↔ ' + abbrevToHash);
+				: (type === GitFileStatus.Added ? `Added in ${abbrevToHash}` : type === GitFileStatus.Deleted ? `Deleted in ${abbrevToHash}` : `${abbrevFromHash}^1 ↔ ${abbrevToHash}`)
+			: (type === GitFileStatus.Added ? `Added between ${abbrevFromHash} & ${abbrevToHash}` : type === GitFileStatus.Deleted ? `Deleted between ${abbrevFromHash} & ${abbrevToHash}` : `${abbrevFromHash} ↔ ${abbrevToHash}`);
 		let title = pathComponents[pathComponents.length - 1] + ' (' + desc + ')';
 		if (fromHash === UNCOMMITTED) fromHash = 'HEAD';
 
