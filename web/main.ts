@@ -180,7 +180,7 @@ export class GitGraphView {
 			this.avatars = prevState.avatars;
 			this.gitConfig = prevState.gitConfig;
 			this.loadRepoInfo(prevState.gitBranches, prevState.gitBranchHead, prevState.gitRemotes, prevState.gitStashes, true);
-			this.loadCommits(prevState.commits, prevState.commitHead, prevState.gitTags, prevState.moreCommitsAvailable, prevState.onlyFollowFirstParent);
+			// this.loadCommits(prevState.commits, prevState.commitHead, prevState.gitTags, prevState.moreCommitsAvailable, prevState.onlyFollowFirstParent);
 			this.findWidget.restoreState(prevState.findWidget);
 			this.authorDropdown.setOptions(this.getAuthorOptions(), this.currentAuthors);
 			this.settingsWidget.restoreState(prevState.settingsWidget);
