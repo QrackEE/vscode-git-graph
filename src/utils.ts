@@ -474,13 +474,12 @@ export async function viewDiffWithWorkingFile(repo: string, hash: string, filePa
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
 export function viewFileAtRevision(repo: string, hash: string, filePath: string) {
-	const pathComponents = filePath.split('/');
-	const title = abbrevCommit(hash) + ': ' + pathComponents[pathComponents.length - 1];
+	const title = `${path.basename(filePath)} (${abbrevCommit(hash)})`;
 
-	return vscode.commands.executeCommand('vscode.open', encodeDiffDocUri(repo, filePath, hash, GitFileStatus.Modified, DiffSide.New).with({ path: title }), {
+	return vscode.commands.executeCommand('vscode.open', encodeDiffDocUri(repo, filePath, hash, GitFileStatus.Modified, DiffSide.New), {
 		preview: true,
 		viewColumn: getConfig().openNewTabEditorGroup
-	}).then(
+	}, title).then(
 		() => null,
 		() => 'Visual Studio Code was unable to open ' + filePath + ' at commit ' + abbrevCommit(hash) + '.'
 	);
