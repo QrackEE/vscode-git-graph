@@ -177,6 +177,7 @@ export class GitGraphView {
 			this.maxCommits = prevState.maxCommits;
 			this.expandedCommit = prevState.expandedCommit;
 			this.contentScrollTop = prevState.contentScrollTop;
+			this.filterCurrent = prevState.filterCurrent;
 			this.avatars = prevState.avatars;
 			this.gitConfig = prevState.gitConfig;
 			this.loadRepoInfo(prevState.gitBranches, prevState.gitBranchHead, prevState.gitRemotes, prevState.gitStashes, true);
@@ -794,6 +795,7 @@ export class GitGraphView {
 			avatars: this.avatars,
 			currentBranches: this.currentBranches,
 			contentScrollTop: this.contentScrollTop,
+			filterCurrent: this.filterCurrent,
 			moreCommitsAvailable: this.moreCommitsAvailable,
 			maxCommits: this.maxCommits,
 			onlyFollowFirstParent: this.onlyFollowFirstParent,

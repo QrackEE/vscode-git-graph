@@ -67,6 +67,7 @@ declare global {
 		readonly expandedCommit: ExpandedCommit | null;
 		readonly scrollTop: number;
 		readonly contentScrollTop: number|undefined;
+		readonly filterCurrent: boolean;
 		readonly findWidget: FindWidgetState;
 		readonly settingsWidget: SettingsWidgetState;
 	}
