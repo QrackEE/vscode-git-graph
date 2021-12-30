@@ -2837,7 +2837,7 @@ export class GitGraphView {
 		// elem.style.height = heightPx;
 		// if (isDocked) this.viewElem.style.bottom = heightPx;
 		elem.style.left = Math.min(window.innerWidth - 400, (this.mousePosition.x + 100)) + "px";
-		elem.style.top = Math.min(window.innerHeight - elem.clientHeight - 10, Math.max(0, (this.mousePosition.y - 80))) + "px";
+		elem.style.top = Math.max(Math.min(window.innerHeight - elem.clientHeight - 10, Math.max(0, (this.mousePosition.y - 80))),0) + "px";
 		this.setContentHeight(height)
 	}
 
