@@ -133,8 +133,8 @@ export class GitGraphView {
 			this.refresh(true);
 		});
 
-		window.onblur=()=>{
-			this!.contentScrollTop=document.getElementById('content')?.scrollTop
+		window.onblur = () => {
+			this!.contentScrollTop = document.getElementById('content')?.scrollTop
 			this.saveState()
 		}
 
@@ -995,8 +995,9 @@ export class GitGraphView {
 				}
 			}
 		}
-		if(this.contentScrollTop){
-			document.getElementById('content')!.scrollTop=this.contentScrollTop!
+		if (this.contentScrollTop) {
+			document.getElementById('content')!.scrollTop = this.contentScrollTop!
+			this.contentScrollTop = undefined
 		}
 	}
 
