@@ -621,7 +621,7 @@ export class GitGraphView extends Disposable {
 			case 'viewDiffWithWorkingFile':
 				this.sendMessage({
 					command: 'viewDiffWithWorkingFile',
-					error: await viewDiffWithWorkingFile(msg.repo, msg.hash, msg.filePath, this.dataSource)
+					error: await viewDiffWithWorkingFile(msg.repo, msg.hash, msg.filePath, this.dataSource,this.fileUri)
 				});
 				break;
 			case 'viewFileAtRevision':

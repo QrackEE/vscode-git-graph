@@ -446,7 +446,7 @@ export function viewDiff(repo: string, fromHash: string, toHash: string, oldFile
  * @param dataSource A DataSource instance, that's used to check if the file has been renamed.
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
-export async function viewDiffWithWorkingFile(repo: string, hash: string, filePath: string, dataSource: DataSource) {
+export async function viewDiffWithWorkingFile(repo: string, hash: string, filePath: string, dataSource: DataSource, fileUrl?: vscode.Uri) {
 	let newFilePath = filePath;
 	let fileExists = await doesFileExist(path.join(repo, newFilePath));
 	if (!fileExists) {
@@ -463,7 +463,7 @@ export async function viewDiffWithWorkingFile(repo: string, hash: string, filePa
 			: GitFileStatus.Renamed
 		: GitFileStatus.Deleted;
 
-	return viewDiff(repo, hash, UNCOMMITTED, filePath, newFilePath, type);
+	return viewDiff(repo, hash, UNCOMMITTED, filePath, newFilePath, type, fileUrl);
 }
 
 /**
