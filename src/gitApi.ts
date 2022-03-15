@@ -46,6 +46,8 @@ export class GitAPi {
                 const confirm = await window.showQuickPick(["YES", "NO"], { placeHolder: "Are you want to quick sync?", ignoreFocusOut: true })
                 if (confirm == "YES") {
                     repo.inputBox.value = 'Quick Sync'
+                } else {
+                    return;
                 }
             }
             commands.executeCommand("git.stageAll").then(() => {
