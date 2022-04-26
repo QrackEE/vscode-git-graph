@@ -47,7 +47,7 @@ declare global {
 	}
 
 	interface WebViewState {
-		readonly mousePosition: {x:number,y:number};
+		readonly mousePosition: { x: number, y: number };
 		readonly currentRepo: string;
 		readonly currentRepoLoading: boolean;
 		readonly gitRepos: GG.GitRepoSet;
@@ -66,8 +66,9 @@ declare global {
 		readonly onlyFollowFirstParent: boolean;
 		readonly expandedCommit: ExpandedCommit | null;
 		readonly scrollTop: number;
-		readonly contentScrollTop: number|undefined;
+		readonly contentScrollTop: number | undefined;
 		readonly filterCurrent: boolean;
+		readonly searchValue: string | null;
 		readonly findWidget: FindWidgetState;
 		readonly settingsWidget: SettingsWidgetState;
 	}

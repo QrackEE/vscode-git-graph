@@ -178,6 +178,11 @@ export class GitGraphView {
 			this.expandedCommit = prevState.expandedCommit;
 			this.contentScrollTop = prevState.contentScrollTop;
 			this.filterCurrent = prevState.filterCurrent;
+			this.searchValue = prevState.searchValue;
+			const searchInput: HTMLInputElement = document.getElementById('searchInput') as any;
+			if(searchInput && this.searchValue){
+				searchInput.value=this.searchValue
+			}
 			this.avatars = prevState.avatars;
 			this.gitConfig = prevState.gitConfig;
 			this.loadRepoInfo(prevState.gitBranches, prevState.gitBranchHead, prevState.gitRemotes, prevState.gitStashes, true);
@@ -796,6 +801,7 @@ export class GitGraphView {
 			currentBranches: this.currentBranches,
 			contentScrollTop: this.contentScrollTop,
 			filterCurrent: this.filterCurrent,
+			searchValue: this.searchValue,
 			moreCommitsAvailable: this.moreCommitsAvailable,
 			maxCommits: this.maxCommits,
 			onlyFollowFirstParent: this.onlyFollowFirstParent,
