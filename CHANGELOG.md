@@ -1,5 +1,10 @@
 # Change Log
 
+# 2.2.0 - 2022-4-27
+
+- Fix cannot view hitory when has multiple repository.
+- Keep focus after history view created.
+
 # 2.0.1 - 2021-12-23
 
 - Migrate to webpack.

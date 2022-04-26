@@ -1,7 +1,7 @@
 {
 	"name": "git-graph-history",
 	"displayName": "Git Graph History",
-	"version": "2.1.4",
+	"version": "2.2.0",
 	"publisher": "cweijan",
 	"author": {
 		"name": "Michael Hutchison",
