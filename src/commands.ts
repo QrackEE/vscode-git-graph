@@ -42,6 +42,7 @@ export class CommandManager extends Disposable {
 		this.avatarManager = avatarManger;
 		this.dataSource = dataSource;
 		this.extensionState = extensionState;
+		this.dataSource.extensionState = extensionState;
 		this.logger = logger;
 		this.repoManager = repoManager;
 		this.gitExecutable = gitExecutable;
@@ -53,7 +54,7 @@ export class CommandManager extends Disposable {
 		this.registerCommand('git-graph.removeGitRepository', () => this.removeGitRepository());
 		this.registerCommand('git-graph.clearAvatarCache', () => this.clearAvatarCache());
 		this.registerCommand('git-graph.fetch', () => this.fetch());
-		this.registerCommand('git-graph.quickSync', () => GitAPi.quickSync());
+		this.registerCommand('git-graph.quickSync', (arg) => GitAPi.quickSync(arg));
 		this.registerCommand('git-graph.endAllWorkspaceCodeReviews', () => this.endAllWorkspaceCodeReviews());
 		this.registerCommand('git-graph.endSpecificWorkspaceCodeReview', () => this.endSpecificWorkspaceCodeReview());
 		this.registerCommand('git-graph.resumeWorkspaceCodeReview', () => this.resumeWorkspaceCodeReview());

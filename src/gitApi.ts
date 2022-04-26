@@ -1,5 +1,5 @@
-import { relative } from 'path';
-import { commands, extensions, Uri, window } from 'vscode';
+import { relative, resolve } from 'path';
+import { commands, extensions, SourceControl, Uri, window } from 'vscode';
 import { API, GitExtension, Repository } from './git';
 
 export class GitAPi {
@@ -27,20 +27,26 @@ export class GitAPi {
         return this.api;
     }
 
-    public static async getRepo(): Promise<Repository> {
+    public static async getRepo(uri?: Uri | SourceControl | string | null): Promise<Repository> {
+        const gitUri: SourceControl = uri as any;
         const gitApi = await GitAPi.getApi();
-        const currentIndex = gitApi.repositories.length === 1 ? 0 : gitApi.repositories.findIndex(x => x.ui.selected);
+        let currentIndex = 0;
+        if (typeof uri == 'string') {
+            currentIndex = gitApi.repositories.findIndex(x => resolve(x.rootUri.fsPath) == resolve(uri));
+        } else if (gitUri?.rootUri) {
+            currentIndex = gitApi.repositories.findIndex(x => gitUri.rootUri?.fsPath == x.rootUri.fsPath);
+        }
         return gitApi.repositories[currentIndex];
     }
 
-    public static async getRelative(uri: Uri): Promise<string> {
-        const repo = await this.getRepo();
+    public static async getRelative(repoPath: string | null, uri: Uri): Promise<string> {
+        const repo = await this.getRepo(repoPath);
         const gitRoot = repo.rootUri.fsPath;
         return relative(gitRoot, uri.fsPath).replace(/\\/g, '/');
     }
 
-    public static async quickSync() {
-        const repo = await this.getRepo();
+    public static async quickSync(uri: SourceControl) {
+        const repo = await this.getRepo(uri);
         if (repo.state.workingTreeChanges.length > 0 || repo.state.indexChanges.length > 0) {
             if (!repo.inputBox.value) {
                 const confirm = await window.showQuickPick(["YES", "NO"], { placeHolder: "Are you want to quick sync?", ignoreFocusOut: true })

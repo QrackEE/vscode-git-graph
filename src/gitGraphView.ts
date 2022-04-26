@@ -89,7 +89,7 @@ export class GitGraphView extends Disposable {
 		this.loadViewTo = loadViewTo;
 
 		const config = getConfig();
-		const title = fileUri ? `Git History(${path.basename(fileUri.fsPath)})` : 'Git History';
+		const title = fileUri?.fsPath ? `Git History(${path.basename(fileUri.fsPath)})` : 'Git History';
 		const activePath = vscode.window.activeTextEditor?.document?.uri?.fsPath;
 		if (fileUri && activePath == fileUri?.fsPath) {
 			column = vscode.ViewColumn.Two
@@ -416,7 +416,7 @@ export class GitGraphView extends Disposable {
 				break;
 			case 'loadCommits':
 				this.loadCommitsRefreshId = msg.refreshId;
-				const relPath = this.fileUri ? await GitAPi.getRelative(this.fileUri) : undefined;
+				const relPath = this.fileUri?.fsPath ? await GitAPi.getRelative(this.extensionState.getLastActiveRepo(),this.fileUri) : undefined;
 				this.sendMessage({
 					command: 'loadCommits',
 					refreshId: msg.refreshId,

@@ -4,6 +4,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { AskpassEnvironment, AskpassManager } from './askpass/askpassManager';
 import { getConfig } from './config';
+import { ExtensionState } from './extensionState';
+import { Repository } from './git';
 import { GitAPi } from './gitApi';
 import { Logger } from './logger';
 import { RequestLoadCommits, ActionedUser, CommitOrdering, DateType, DeepWriteable, ErrorInfo, ErrorInfoExtensionPrefix, GitCommit, GitCommitDetails, GitCommitStash, GitConfigLocation, GitFileChange, GitFileStatus, GitPushBranchMode, GitRepoConfig, GitRepoConfigBranches, GitResetMode, GitSignature, GitSignatureStatus, GitStash, GitTagDetails, MergeActionOn, RebaseActionOn, SquashMessageFormat, TagType, Writeable } from './types';
@@ -38,6 +40,7 @@ const GPG_STATUS_CODE_PARSING_DETAILS: Readonly<{ [statusCode: string]: GpgStatu
  * Interfaces Git Graph with the Git executable to provide all Git integrations.
  */
 export class DataSource extends Disposable {
+	public extensionState?: ExtensionState;
 	private readonly logger: Logger;
 	private readonly askpassEnv: AskpassEnvironment;
 	private gitExecutable!: GitExecutable | null;
@@ -447,8 +450,9 @@ export class DataSource extends Disposable {
 	 * @returns The file contents.
 	 */
 	public async getCommitFile(repo: string, commitHash: string, filePath: string) {
-		const repository = await GitAPi.getRepo()
-		return repository.buffer(commitHash, path.join(repository.rootUri.fsPath,filePath));
+		const repositoryPath = this.extensionState!.getLastActiveRepo() as string
+		const repository = await GitAPi.getRepo(repositoryPath)
+		return repository.buffer(commitHash, path.join(repository.rootUri.fsPath, filePath));
 	}
 
 
