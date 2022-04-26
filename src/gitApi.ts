@@ -27,6 +27,7 @@ export class GitAPi {
         return this.api;
     }
 
+    // 现在通过最后活跃有点问题, 不过够用了, 以后有需要参考解决参考: web\utils.ts->getSortedRepositoryPaths
     public static async getRepo(uri?: Uri | SourceControl | string | null): Promise<Repository> {
         const gitUri: SourceControl = uri as any;
         const gitApi = await GitAPi.getApi();
