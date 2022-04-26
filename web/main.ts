@@ -179,6 +179,7 @@ export class GitGraphView {
 			this.contentScrollTop = prevState.contentScrollTop;
 			this.filterCurrent = prevState.filterCurrent;
 			this.searchValue = prevState.searchValue;
+			this.currentAuthors = prevState.currentAuthors;
 			const searchInput: HTMLInputElement = document.getElementById('searchInput') as any;
 			if(searchInput && this.searchValue){
 				searchInput.value=this.searchValue
@@ -799,6 +800,7 @@ export class GitGraphView {
 			commitHead: this.commitHead,
 			avatars: this.avatars,
 			currentBranches: this.currentBranches,
+			currentAuthors: this.currentAuthors,
 			contentScrollTop: this.contentScrollTop,
 			filterCurrent: this.filterCurrent,
 			searchValue: this.searchValue,

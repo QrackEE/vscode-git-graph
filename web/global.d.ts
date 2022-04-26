@@ -69,6 +69,7 @@ declare global {
 		readonly contentScrollTop: number | undefined;
 		readonly filterCurrent: boolean;
 		readonly searchValue: string | null;
+		readonly currentAuthors: string[];
 		readonly findWidget: FindWidgetState;
 		readonly settingsWidget: SettingsWidgetState;
 	}
