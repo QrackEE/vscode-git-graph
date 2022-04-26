@@ -60,7 +60,7 @@ export class GitGraphView extends Disposable {
 				// If the Git History panel is not visible
 				currentPanel.loadViewTo = loadViewTo;
 			}
-			currentPanel.panel.reveal(column);
+			currentPanel.panel.reveal(currentPanel.panel.viewColumn, true);
 		} else {
 			// If Git History panel doesn't already exist
 			GitGraphView.panelMap[fileUri + ''] = new GitGraphView(extensionPath, dataSource, extensionState, avatarManager, repoManager, logger, loadViewTo, column, fileUri);
@@ -110,6 +110,7 @@ export class GitGraphView extends Disposable {
 			};
 
 
+		let ace = column == vscode.ViewColumn.Two ? vscode.window.activeTextEditor : null
 		this.registerDisposables(
 			// Dispose Git History View resources when disposed
 			toDisposable(() => {
@@ -155,7 +156,13 @@ export class GitGraphView extends Disposable {
 			}),
 
 			// Respond to messages sent from the Webview
-			this.panel.webview.onDidReceiveMessage((msg) => this.respondToMessage(msg)),
+			this.panel.webview.onDidReceiveMessage((msg) => {
+				if (ace) {
+					vscode.window.showTextDocument(ace.document)
+					ace = null;
+				}
+				this.respondToMessage(msg)
+			}),
 
 			// Dispose the Webview Panel when disposed
 			this.panel
@@ -167,6 +174,7 @@ export class GitGraphView extends Disposable {
 				this.sendMessage({ command: 'refresh' });
 			}
 		});
+
 
 		// Render the content of the Webview
 		this.update();
@@ -416,7 +424,7 @@ export class GitGraphView extends Disposable {
 				break;
 			case 'loadCommits':
 				this.loadCommitsRefreshId = msg.refreshId;
-				const relPath = this.fileUri?.fsPath ? await GitAPi.getRelative(this.extensionState.getLastActiveRepo(),this.fileUri) : undefined;
+				const relPath = this.fileUri?.fsPath ? await GitAPi.getRelative(this.extensionState.getLastActiveRepo(), this.fileUri) : undefined;
 				this.sendMessage({
 					command: 'loadCommits',
 					refreshId: msg.refreshId,
@@ -615,13 +623,13 @@ export class GitGraphView extends Disposable {
 			case 'viewDiff':
 				this.sendMessage({
 					command: 'viewDiff',
-					error: await viewDiff(msg.repo, msg.fromHash, msg.toHash, msg.oldFilePath, msg.newFilePath, msg.type,this.fileUri)
+					error: await viewDiff(msg.repo, msg.fromHash, msg.toHash, msg.oldFilePath, msg.newFilePath, msg.type, this.fileUri)
 				});
 				break;
 			case 'viewDiffWithWorkingFile':
 				this.sendMessage({
 					command: 'viewDiffWithWorkingFile',
-					error: await viewDiffWithWorkingFile(msg.repo, msg.hash, msg.filePath, this.dataSource,this.fileUri)
+					error: await viewDiffWithWorkingFile(msg.repo, msg.hash, msg.filePath, this.dataSource, this.fileUri)
 				});
 				break;
 			case 'viewFileAtRevision':
