@@ -4,10 +4,10 @@
 	"version": "2.2.0",
 	"publisher": "cweijan",
 	"author": {
-		"name": "Michael Hutchison",
+		"name": "Weijan Chen",
 		"email": "cweijan@163.com"
 	},
-	"description": "View a Git History of your repository, and perform Git actions from the graph.",
+	"description": "View Git History as graph, and perform Git actions from the graph.",
 	"keywords": [
 		"git",
 		"graph",
@@ -1516,13 +1516,10 @@
 	"scripts": {
 		"dev": "webpack --progress",
 		"build": "webpack --progress --mode=production",
-		"lint": "eslint -c .eslintrc.json --max-warnings 0 --ext .ts ./src ./tests ./web",
 		"vscode:prepublish": "npm run build",
 		"vscode:uninstall": "node ./out/life-cycle/uninstall.js",
 		"package": "vsce package",
-		"package-and-install": "npm run package && node ./.vscode/install-package.js",
-		"test": "jest --verbose",
-		"test-and-report-coverage": "jest --verbose --coverage"
+		"package-and-install": "npm run package && node ./.vscode/install-package.js"
 	},
 	"dependencies": {
 		"ajv-keywords": "^3.5.2",
@@ -1530,17 +1527,11 @@
 		"iconv-lite": "0.5.0"
 	},
 	"devDependencies": {
-		"@types/jest": "26.0.19",
 		"@types/node": "8.10.62",
 		"@types/vscode": "1.38.0",
-		"@typescript-eslint/eslint-plugin": "4.10.0",
-		"@typescript-eslint/parser": "4.10.0",
 		"css-loader": "^6.5.1",
-		"eslint": "7.15.0",
-		"jest": "26.6.3",
 		"mini-css-extract-plugin": "^2.4.5",
 		"style-loader": "^3.3.1",
-		"ts-jest": "26.4.4",
 		"ts-loader": "^7.0.5",
 		"typescript": "4.0.2",
 		"webpack": "^5.65.0",
