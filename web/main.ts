@@ -1197,7 +1197,7 @@ export class GitGraphView {
 				title: 'Copy Commit Text',
 				visible: visibility.copyHash,
 				onClick: () => {
-					sendMessage({ command: 'copyToClipboard', type: 'Commit Hash', data: target.elem.innerText.split("\n")[1] });
+					sendMessage({ command: 'copyToClipboard', type: 'Commit Hash', data: commit.message });
 				}
 			}, {
 				title: 'Reset Branch' + ELLIPSIS,

@@ -1,5 +1,9 @@
 # Change Log
 
+# 2.2.1 - 2022-6-19
+
+- Fixed the commit message cannot be copied correctly.
+
 # 2.2.0 - 2022-4-27
 
 - Fix cannot view hitory when has multiple repository.
