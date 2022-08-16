@@ -1,6 +1,6 @@
 # Git Graph History
 
-This extension fork from [Git Graph](https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph), the main change is to support viewing the history of file.
+This extension fork from [Git Graph](https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph), for my personal use, do not install it.
 
 ## Features
 
