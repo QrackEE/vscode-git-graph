@@ -1,6 +1,6 @@
 # Git Graph History
 
-This extension fork from [Git Graph](https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph), for my personal use, do not install it.
+This extension fork from [Git Graph](https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph), for my personal use, and has many differences from the original, please use it with caution.
 
 ## Features
 
