@@ -3203,6 +3203,7 @@ export class GitGraphView {
 
 			const fileElem = getFileElemOfEventTarget(e.target);
 			triggerOpenFile(getFileOfFileElem(expandedCommit.fileChanges, fileElem), fileElem);
+			e.stopPropagation()
 		});
 
 		addListenerToClass('fileTreeFileRecord', 'contextmenu', (e: Event) => {

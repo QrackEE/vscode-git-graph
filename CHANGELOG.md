@@ -2,6 +2,7 @@
 
 # 2.2.2 - 2022-12-29
 
+- Fix diff triggered after opening a file.
 - Do not update when history view visibility changes.
 
 # 2.2.1 - 2022-6-19
