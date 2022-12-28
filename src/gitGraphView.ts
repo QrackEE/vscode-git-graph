@@ -123,6 +123,7 @@ export class GitGraphView extends Disposable {
 
 			// Register a callback that is called when the view is shown or hidden
 			this.panel.onDidChangeViewState(() => {
+				if (config.retainContextWhenHidden) return;
 				if (this.panel.visible !== this.isPanelVisible) {
 					if (this.panel.visible) {
 						this.update();

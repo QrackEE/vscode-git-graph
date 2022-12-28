@@ -1,5 +1,9 @@
 # Change Log
 
+# 2.2.2 - 2022-12-29
+
+- Do not update when history view visibility changes.
+
 # 2.2.1 - 2022-6-19
 
 - Fixed the commit message cannot be copied correctly.
