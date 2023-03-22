@@ -1,7 +1,7 @@
 {
-	"name": "git-graph-history",
-	"displayName": "Git Graph History",
-	"version": "2.2.2",
+	"name": "git-graph-history2",
+	"displayName": "Git GH",
+	"version": "2.2.3",
 	"publisher": "cweijan",
 	"author": {
 		"name": "Weijan Chen",

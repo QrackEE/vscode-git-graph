@@ -1,5 +1,9 @@
 # Change Log
 
+# 2.2.3 2023-3-22
+
+- Support view add and removed files.
+
 # 2.2.2 - 2022-12-29
 
 - Fix diff triggered after opening a file.
