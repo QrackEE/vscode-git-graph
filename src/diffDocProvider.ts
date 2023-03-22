@@ -60,9 +60,9 @@ export class DiffDocProvider extends Disposable implements vscode.FileSystemProv
 	}
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
 		const request = decodeDiffDocUri(uri);
-		if (!request.exists) {
-			return new Buffer(0);
-		}
+		// if (!request.exists) {
+		// 	return new Buffer(0);
+		// }
 		return this.dataSource.getCommitFile(request.repo, request.commit, request.filePath)
 	}
 	writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {

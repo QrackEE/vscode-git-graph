@@ -3177,7 +3177,7 @@ export class GitGraphView {
 			if (expandedCommit === null || expandedCommit.fileChanges === null || e.target === null) return;
 
 			const sourceElem = <HTMLElement>(<Element>e.target).closest('.fileTreeFile'), fileElem = getFileElemOfEventTarget(e.target);
-			if (!sourceElem.classList.contains('gitDiffPossible')) return;
+			// if (!sourceElem.classList.contains('gitDiffPossible')) return;
 			triggerViewFileDiff(getFileOfFileElem(expandedCommit.fileChanges, fileElem), fileElem);
 		});
 

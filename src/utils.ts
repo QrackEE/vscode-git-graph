@@ -426,7 +426,14 @@ export function viewDiff(repo: string, fromHash: string, toHash: string, oldFile
 		let title = pathComponents[pathComponents.length - 1] + ' (' + desc + ')';
 		if (fromHash === UNCOMMITTED) fromHash = 'HEAD';
 
-		return vscode.commands.executeCommand('vscode.diff', encodeDiffDocUri(repo, oldFilePath, fromHash === toHash ? fromHash + '^' : fromHash, type, DiffSide.Old), encodeDiffDocUri(repo, newFilePath, toHash, type, DiffSide.New), title, {
+		const oldHash = (fromHash === toHash && type != GitFileStatus.Added) ? fromHash + '^' : fromHash;
+		const oldUrl = encodeDiffDocUri(repo, oldFilePath, oldHash, type, DiffSide.Old);
+		if ([GitFileStatus.Deleted, GitFileStatus.Added].includes(type)) {
+			vscode.commands.executeCommand('vscode.openWith', oldUrl, "default", vscode.ViewColumn.One);
+			return null;
+		}
+		const newUrl = encodeDiffDocUri(repo, newFilePath, toHash, type, DiffSide.New);
+		return vscode.commands.executeCommand('vscode.diff', oldUrl, newUrl, title, {
 			preview: true,
 			viewColumn: fileUrl ? vscode.ViewColumn.One : getConfig().openNewTabEditorGroup
 		} as vscode.TextDocumentShowOptions).then(
