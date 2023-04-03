@@ -1,5 +1,7 @@
-const CLASS_EXTERNAL_URL = 'externalUrl';
-const CLASS_INTERNAL_URL = 'internalUrl';
+import { escapeHtml } from "./utils";
+
+export const CLASS_EXTERNAL_URL = 'externalUrl';
+export const CLASS_INTERNAL_URL = 'internalUrl';
 
 namespace TF {
 	export const enum NodeType {
@@ -98,9 +100,9 @@ namespace TF {
 }
 
 /**
- * Parses text, and produces formatted HTML for the Git Graph View.
+ * Parses text, and produces formatted HTML for the Git History View.
  */
-class TextFormatter {
+export class TextFormatter {
 	private readonly config: Readonly<{
 		commits: boolean,
 		emoji: boolean,
@@ -126,7 +128,7 @@ class TextFormatter {
 
 	/**
 	 * Construct a TextFormatter instance.
-	 * @param commits The array of commits currently loaded in the Git Graph View.
+	 * @param commits The array of commits currently loaded in the Git History View.
 	 * @param repoIssueLinkingConfig The Issue Linking Configuration of the current repository.
 	 * @param config The configuration of the TextFormatter, to determine which types of formatting should be performed.
 	 * @returns The TextFormatter instance.
@@ -560,7 +562,7 @@ class TextFormatter {
  * @param elem The element to check.
  * @returns TRUE => The element is an external or internal URL, FALSE => The element isn't an external or internal URL
  */
-function isUrlElem(elem: Element) {
+export function isUrlElem(elem: Element) {
 	return elem.classList.contains(CLASS_EXTERNAL_URL) || elem.classList.contains(CLASS_INTERNAL_URL);
 }
 
@@ -569,7 +571,7 @@ function isUrlElem(elem: Element) {
  * @param elem The element to check.
  * @returns TRUE => The element is an external URL, FALSE => The element isn't an external URL
  */
-function isExternalUrlElem(elem: Element) {
+export function isExternalUrlElem(elem: Element) {
 	return elem.classList.contains(CLASS_EXTERNAL_URL);
 }
 
@@ -578,26 +580,26 @@ function isExternalUrlElem(elem: Element) {
  * @param elem The element to check.
  * @returns TRUE => The element is an internal URL, FALSE => The element isn't an internal URL
  */
-function isInternalUrlElem(elem: Element) {
+export function isInternalUrlElem(elem: Element) {
 	return elem.classList.contains(CLASS_INTERNAL_URL);
 }
 
 
 /* Issue Linking Methods */
 
-interface IssueLinking {
+export interface IssueLinking {
 	readonly regexp: RegExp;
 	readonly url: string;
 }
 
-const ISSUE_LINKING_ARGUMENT_REGEXP = /\$([1-9][0-9]*)/g;
+export const ISSUE_LINKING_ARGUMENT_REGEXP = /\$([1-9][0-9]*)/g;
 
 /**
  * Parses the Issue Linking Configuration of a repository, so it's ready to be used for detecting issues and generating links.
  * @param issueLinkingConfig The Issue Linking Configuration.
  * @returns The parsed Issue Linking, or `NULL` if it's not available.
  */
-function parseIssueLinkingConfig(issueLinkingConfig: GG.IssueLinkingConfig | null): IssueLinking | null {
+ export function parseIssueLinkingConfig(issueLinkingConfig: GG.IssueLinkingConfig | null): IssueLinking | null {
 	if (issueLinkingConfig !== null) {
 		try {
 			return {
@@ -615,7 +617,7 @@ function parseIssueLinkingConfig(issueLinkingConfig: GG.IssueLinkingConfig | nul
  * @param issueLinking The Issue Linking.
  * @returns The URL for the issue link.
  */
-function generateIssueLinkFromMatch(match: RegExpExecArray, issueLinking: IssueLinking) {
+ export function generateIssueLinkFromMatch(match: RegExpExecArray, issueLinking: IssueLinking) {
 	return match.length > 1
 		? issueLinking.url.replace(ISSUE_LINKING_ARGUMENT_REGEXP, (placeholder, index) => {
 			const i = parseInt(index);

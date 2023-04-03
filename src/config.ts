@@ -43,7 +43,7 @@ const VIEW_COLUMN_MAPPING: { [column: string]: vscode.ViewColumn } = {
 };
 
 /**
- * Represents the users configuration of Git Graph Extension Settings.
+ * Represents the users configuration of Git History Extension Settings.
  */
 class Config {
 	private readonly config: vscode.WorkspaceConfiguration;
@@ -489,7 +489,7 @@ class Config {
 	 * Get the value of the `git-graph.repository.showUncommittedChanges` Extension Setting.
 	 */
 	get showUncommittedChanges() {
-		return !!this.getRenamedExtensionSetting('repository.showUncommittedChanges', 'showUncommittedChanges', true);
+		return !!this.getRenamedExtensionSetting('repository.showUncommittedChanges', 'showUncommittedChanges', false);
 	}
 
 	/**
@@ -607,7 +607,7 @@ class Config {
 }
 
 /**
- * Get a Config instance for retrieving the users configuration of Git Graph Extension Settings.
+ * Get a Config instance for retrieving the users configuration of Git History Extension Settings.
  * @param repo An optional path of a repository (to be used for Workspace Folder Scoped Configuration Values).
  * @returns A Config instance.
  */

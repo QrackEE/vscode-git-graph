@@ -13,12 +13,12 @@ import { GitExecutable, UNABLE_TO_FIND_GIT_MSG, findGit, getGitExecutableFromPat
 import { EventEmitter } from './utils/event';
 
 /**
- * Activate Git Graph.
+ * Activate Git History.
  * @param context The context of the extension.
  */
 export async function activate(context: vscode.ExtensionContext) {
 	const logger = new Logger();
-	logger.log('Starting Git Graph ...');
+	logger.log('Starting Git History ...');
 
 	const gitExecutableEmitter = new EventEmitter<GitExecutable>();
 	const onDidChangeGitExecutable = gitExecutableEmitter.subscribe;
@@ -47,7 +47,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	const diffDocProvider = new DiffDocProvider(dataSource);
 
 	context.subscriptions.push(
-		vscode.workspace.registerTextDocumentContentProvider(DiffDocProvider.scheme, diffDocProvider),
+		vscode.workspace.registerFileSystemProvider(DiffDocProvider.scheme, diffDocProvider,{
+			isCaseSensitive: true,
+			isReadonly: true,
+		}),
 		vscode.workspace.onDidChangeConfiguration((event) => {
 			if (event.affectsConfiguration('git-graph')) {
 				configurationEmitter.emit(event);
@@ -57,7 +60,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 				getGitExecutableFromPaths(paths).then((gitExecutable) => {
 					gitExecutableEmitter.emit(gitExecutable);
-					const msg = 'Git Graph is now using ' + gitExecutable.path + ' (version: ' + gitExecutable.version + ')';
+					const msg = 'Git History is now using ' + gitExecutable.path + ' (version: ' + gitExecutable.version + ')';
 					showInformationMessage(msg);
 					logger.log(msg);
 					repoManager.searchWorkspaceForRepos();
@@ -79,13 +82,13 @@ export async function activate(context: vscode.ExtensionContext) {
 		gitExecutableEmitter,
 		logger
 	);
-	logger.log('Started Git Graph - Ready to use!');
+	logger.log('Started Git History - Ready to use!');
 
 	extensionState.expireOldCodeReviews();
 	onStartUp(context).catch(() => { });
 }
 
 /**
- * Deactivate Git Graph.
+ * Deactivate Git History.
  */
 export function deactivate() { }

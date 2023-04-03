@@ -2,20 +2,22 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { AvatarManager } from './avatarManager';
 import { getConfig } from './config';
-import { DataSource, GitCommitDetailsData, GitConfigKey } from './dataSource';
+import { DataSource, GitConfigKey } from './dataSource';
 import { ExtensionState } from './extensionState';
+import { GitAPi } from './gitApi';
 import { Logger } from './logger';
 import { RepoFileWatcher } from './repoFileWatcher';
 import { RepoManager } from './repoManager';
 import { ErrorInfo, GitConfigLocation, GitGraphViewInitialState, GitPushBranchMode, GitRepoSet, LoadGitGraphViewTo, RequestMessage, ResponseMessage, TabIconColourTheme } from './types';
 import { UNABLE_TO_FIND_GIT_MSG, UNCOMMITTED, archive, copyFilePathToClipboard, copyToClipboard, createPullRequest, getNonce, openExtensionSettings, openExternalUrl, openFile, showErrorMessage, viewDiff, viewDiffWithWorkingFile, viewFileAtRevision, viewScm } from './utils';
 import { Disposable, toDisposable } from './utils/disposable';
+const remoteIcon = `<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 10 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 0 0-1-3.72C.88 1 0 1.89 0 3a2 2 0 0 0 1 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>`;
 
 /**
- * Manages the Git Graph View.
+ * Manages the Git History View.
  */
 export class GitGraphView extends Disposable {
-	public static currentPanel: GitGraphView | undefined;
+	public static panelMap: { [key: string]: GitGraphView } = {};
 
 	private readonly panel: vscode.WebviewPanel;
 	private readonly extensionPath: string;
@@ -34,48 +36,49 @@ export class GitGraphView extends Disposable {
 	private loadCommitsRefreshId: number = 0;
 
 	/**
-	 * If a Git Graph View already exists, show and update it. Otherwise, create a Git Graph View.
+	 * If a Git History View already exists, show and update it. Otherwise, create a Git History View.
 	 * @param extensionPath The absolute file path of the directory containing the extension.
-	 * @param dataSource The Git Graph DataSource instance.
-	 * @param extensionState The Git Graph ExtensionState instance.
-	 * @param avatarManger The Git Graph AvatarManager instance.
-	 * @param repoManager The Git Graph RepoManager instance.
-	 * @param logger The Git Graph Logger instance.
+	 * @param dataSource The Git History DataSource instance.
+	 * @param extensionState The Git History ExtensionState instance.
+	 * @param avatarManger The Git History AvatarManager instance.
+	 * @param repoManager The Git History RepoManager instance.
+	 * @param logger The Git History Logger instance.
 	 * @param loadViewTo What to load the view to.
 	 */
-	public static createOrShow(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo) {
+	public static createOrShow(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, fileUri?: vscode.Uri) {
 		const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
 
-		if (GitGraphView.currentPanel) {
-			// If Git Graph panel already exists
-			if (GitGraphView.currentPanel.isPanelVisible) {
-				// If the Git Graph panel is visible
+		const currentPanel = GitGraphView.panelMap[fileUri + ''];
+		if (currentPanel) {
+			// If Git History panel already exists
+			if (currentPanel.isPanelVisible) {
+				// If the Git History panel is visible
 				if (loadViewTo !== null) {
-					GitGraphView.currentPanel.respondLoadRepos(repoManager.getRepos(), loadViewTo);
+					currentPanel.respondLoadRepos(repoManager.getRepos(), loadViewTo);
 				}
 			} else {
-				// If the Git Graph panel is not visible
-				GitGraphView.currentPanel.loadViewTo = loadViewTo;
+				// If the Git History panel is not visible
+				currentPanel.loadViewTo = loadViewTo;
 			}
-			GitGraphView.currentPanel.panel.reveal(column);
+			currentPanel.panel.reveal(currentPanel.panel.viewColumn, true);
 		} else {
-			// If Git Graph panel doesn't already exist
-			GitGraphView.currentPanel = new GitGraphView(extensionPath, dataSource, extensionState, avatarManager, repoManager, logger, loadViewTo, column);
+			// If Git History panel doesn't already exist
+			GitGraphView.panelMap[fileUri + ''] = new GitGraphView(extensionPath, dataSource, extensionState, avatarManager, repoManager, logger, loadViewTo, column, fileUri);
 		}
 	}
 
 	/**
-	 * Creates a Git Graph View.
+	 * Creates a Git History View.
 	 * @param extensionPath The absolute file path of the directory containing the extension.
-	 * @param dataSource The Git Graph DataSource instance.
-	 * @param extensionState The Git Graph ExtensionState instance.
-	 * @param avatarManger The Git Graph AvatarManager instance.
-	 * @param repoManager The Git Graph RepoManager instance.
-	 * @param logger The Git Graph Logger instance.
+	 * @param dataSource The Git History DataSource instance.
+	 * @param extensionState The Git History ExtensionState instance.
+	 * @param avatarManger The Git History AvatarManager instance.
+	 * @param repoManager The Git History RepoManager instance.
+	 * @param logger The Git History Logger instance.
 	 * @param loadViewTo What to load the view to.
 	 * @param column The column the view should be loaded in.
 	 */
-	private constructor(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, column: vscode.ViewColumn | undefined) {
+	private constructor(extensionPath: string, dataSource: DataSource, extensionState: ExtensionState, avatarManager: AvatarManager, repoManager: RepoManager, logger: Logger, loadViewTo: LoadGitGraphViewTo, column: vscode.ViewColumn | undefined, readonly fileUri?: vscode.Uri) {
 		super();
 		this.extensionPath = extensionPath;
 		this.avatarManager = avatarManager;
@@ -86,7 +89,15 @@ export class GitGraphView extends Disposable {
 		this.loadViewTo = loadViewTo;
 
 		const config = getConfig();
-		this.panel = vscode.window.createWebviewPanel('git-graph', 'Git Graph', column || vscode.ViewColumn.One, {
+		const title = fileUri?.fsPath ? `Git History(${path.basename(fileUri.fsPath)})` : 'Git History';
+		const activePath = vscode.window.activeTextEditor?.document?.uri?.fsPath;
+		if (fileUri && activePath == fileUri?.fsPath) {
+			column = vscode.ViewColumn.Two
+		}
+		this.panel = vscode.window.createWebviewPanel('git-graph', title, {
+			viewColumn: column || vscode.ViewColumn.One,
+			preserveFocus: true
+		}, {
 			enableScripts: true,
 			localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media'))],
 			retainContextWhenHidden: config.retainContextWhenHidden
@@ -99,18 +110,20 @@ export class GitGraphView extends Disposable {
 			};
 
 
+		let ace = column == vscode.ViewColumn.Two ? vscode.window.activeTextEditor : null
 		this.registerDisposables(
-			// Dispose Git Graph View resources when disposed
+			// Dispose Git History View resources when disposed
 			toDisposable(() => {
-				GitGraphView.currentPanel = undefined;
+				delete GitGraphView.panelMap[fileUri + '']
 				this.repoFileWatcher.stop();
 			}),
 
-			// Dispose this Git Graph View when the Webview Panel is disposed
+			// Dispose this Git History View when the Webview Panel is disposed
 			this.panel.onDidDispose(() => this.dispose()),
 
 			// Register a callback that is called when the view is shown or hidden
 			this.panel.onDidChangeViewState(() => {
+				if (config.retainContextWhenHidden) return;
 				if (this.panel.visible !== this.isPanelVisible) {
 					if (this.panel.visible) {
 						this.update();
@@ -122,7 +135,7 @@ export class GitGraphView extends Disposable {
 				}
 			}),
 
-			// Subscribe to events triggered when a repository is added or deleted from Git Graph
+			// Subscribe to events triggered when a repository is added or deleted from Git History
 			repoManager.onDidChangeRepos((event) => {
 				if (!this.panel.visible) return;
 				const loadViewTo = event.loadRepo !== null ? { repo: event.loadRepo } : null;
@@ -144,23 +157,30 @@ export class GitGraphView extends Disposable {
 			}),
 
 			// Respond to messages sent from the Webview
-			this.panel.webview.onDidReceiveMessage((msg) => this.respondToMessage(msg)),
+			this.panel.webview.onDidReceiveMessage((msg) => {
+				if (ace) {
+					vscode.window.showTextDocument(ace.document)
+					ace = null;
+				}
+				this.respondToMessage(msg)
+			}),
 
 			// Dispose the Webview Panel when disposed
 			this.panel
 		);
 
-		// Instantiate a RepoFileWatcher that watches for file changes in the repository currently open in the Git Graph View
+		// Instantiate a RepoFileWatcher that watches for file changes in the repository currently open in the Git History View
 		this.repoFileWatcher = new RepoFileWatcher(logger, () => {
 			if (this.panel.visible) {
 				this.sendMessage({ command: 'refresh' });
 			}
 		});
 
+
 		// Render the content of the Webview
 		this.update();
 
-		this.logger.log('Created Git Graph View' + (loadViewTo !== null ? ' (active repo: ' + loadViewTo.repo + ')' : ''));
+		this.logger.log('Created Git History View' + (loadViewTo !== null ? ' (active repo: ' + loadViewTo.repo + ')' : ''));
 	}
 
 	/**
@@ -235,7 +255,7 @@ export class GitGraphView extends Disposable {
 				});
 				break;
 			case 'commitDetails':
-				let data = await Promise.all<GitCommitDetailsData, string | null>([
+				let data = await Promise.all([
 					msg.commitHash === UNCOMMITTED
 						? this.dataSource.getUncommittedDetails(msg.repo)
 						: msg.stash === null
@@ -405,11 +425,12 @@ export class GitGraphView extends Disposable {
 				break;
 			case 'loadCommits':
 				this.loadCommitsRefreshId = msg.refreshId;
+				const relPath = this.fileUri?.fsPath ? await GitAPi.getRelative(this.extensionState.getLastActiveRepo(), this.fileUri) : undefined;
 				this.sendMessage({
 					command: 'loadCommits',
 					refreshId: msg.refreshId,
 					onlyFollowFirstParent: msg.onlyFollowFirstParent,
-					...await this.dataSource.getCommits(msg.repo, msg.branches, msg.maxCommits, msg.showTags, msg.showRemoteBranches, msg.includeCommitsMentionedByReflogs, msg.onlyFollowFirstParent, msg.commitOrdering, msg.remotes, msg.hideRemotes, msg.stashes)
+					...await this.dataSource.getCommits(msg, relPath)
 				});
 				break;
 			case 'loadConfig':
@@ -603,13 +624,13 @@ export class GitGraphView extends Disposable {
 			case 'viewDiff':
 				this.sendMessage({
 					command: 'viewDiff',
-					error: await viewDiff(msg.repo, msg.fromHash, msg.toHash, msg.oldFilePath, msg.newFilePath, msg.type)
+					error: await viewDiff(msg.repo, msg.fromHash, msg.toHash, msg.oldFilePath, msg.newFilePath, msg.type, this.fileUri)
 				});
 				break;
 			case 'viewDiffWithWorkingFile':
 				this.sendMessage({
 					command: 'viewDiffWithWorkingFile',
-					error: await viewDiffWithWorkingFile(msg.repo, msg.hash, msg.filePath, this.dataSource)
+					error: await viewDiffWithWorkingFile(msg.repo, msg.hash, msg.filePath, this.dataSource, this.fileUri)
 				});
 				break;
 			case 'viewFileAtRevision':
@@ -635,15 +656,15 @@ export class GitGraphView extends Disposable {
 	 */
 	private sendMessage(msg: ResponseMessage) {
 		if (this.isDisposed()) {
-			this.logger.log('The Git Graph View has already been disposed, ignored sending "' + msg.command + '" message.');
+			this.logger.log('The Git History View has already been disposed, ignored sending "' + msg.command + '" message.');
 		} else {
 			this.panel.webview.postMessage(msg).then(
 				() => { },
 				() => {
 					if (this.isDisposed()) {
-						this.logger.log('The Git Graph View was disposed while sending "' + msg.command + '" message.');
+						this.logger.log('The Git History View was disposed while sending "' + msg.command + '" message.');
 					} else {
-						this.logger.logError('Unable to send "' + msg.command + '" message to the Git Graph View.');
+						this.logger.logError('Unable to send "' + msg.command + '" message to the Git History View.');
 					}
 				}
 			);
@@ -711,21 +732,26 @@ export class GitGraphView extends Disposable {
 
 		if (this.dataSource.isGitExecutableUnknown()) {
 			body = `<body class="unableToLoad">
-			<h2>Unable to load Git Graph</h2>
+			<h2>Unable to load Git History</h2>
 			<p class="unableToLoadMessage">${UNABLE_TO_FIND_GIT_MSG}</p>
 			</body>`;
 		} else if (numRepos > 0) {
 			body = `<body>
 			<div id="view" tabindex="-1">
 				<div id="controls">
+					<input id="searchInput"/>
 					<span id="repoControl"><span class="unselectable">Repo: </span><div id="repoDropdown" class="dropdown"></div></span>
-					<span id="branchControl"><span class="unselectable">Branches: </span><div id="branchDropdown" class="dropdown"></div></span>
+					<span id="branchControl"><span class="unselectable">Branch: </span><div id="branchDropdown" class="dropdown"></div></span>
+					<span id="authorControl"><span class="unselectable">Author: </span><div id="authorDropdown" class="dropdown"></div></span>
 					<label id="showRemoteBranchesControl"><input type="checkbox" id="showRemoteBranchesCheckbox" tabindex="-1"><span class="customCheckbox"></span>Show Remote Branches</label>
+					<div class="toolbar">
+						<div id="fetchBtn"></div>
+						<div id="terminalBtn" title="Open a Terminal for this Repository"></div>
+						<div id="refreshBtn"></div>
+						<a id="openRemoteBtn">${remoteIcon}</a>
+					</div>
 					<div id="findBtn" title="Find"></div>
-					<div id="terminalBtn" title="Open a Terminal for this Repository"></div>
 					<div id="settingsBtn" title="Repository Settings"></div>
-					<div id="fetchBtn"></div>
-					<div id="refreshBtn"></div>
 				</div>
 				<div id="content">
 					<div id="commitGraph"></div>
@@ -739,9 +765,9 @@ export class GitGraphView extends Disposable {
 			</body>`;
 		} else {
 			body = `<body class="unableToLoad">
-			<h2>Unable to load Git Graph</h2>
-			<p class="unableToLoadMessage">No Git repositories were found in the current workspace when it was last scanned by Git Graph.</p>
-			<p>If your repositories are in subfolders of the open workspace folder(s), make sure you have set the Git Graph Setting "git-graph.maxDepthOfRepoSearch" appropriately (read the <a href="https://github.com/mhutchie/vscode-git-graph/wiki/Extension-Settings#max-depth-of-repo-search" target="_blank">documentation</a> for more information).</p>
+			<h2>Unable to load Git History</h2>
+			<p class="unableToLoadMessage">No Git repositories were found in the current workspace when it was last scanned by Git History.</p>
+			<p>If your repositories are in subfolders of the open workspace folder(s), make sure you have set the Git History Setting "git-graph.maxDepthOfRepoSearch" appropriately (read the <a href="https://github.com/mhutchie/vscode-git-graph/wiki/Extension-Settings#max-depth-of-repo-search" target="_blank">documentation</a> for more information).</p>
 			<p><div id="rescanForReposBtn" class="roundedBtn">Re-scan the current workspace for repositories</div></p>
 			<script nonce="${nonce}">(function(){ var api = acquireVsCodeApi(); document.getElementById('rescanForReposBtn').addEventListener('click', function(){ api.postMessage({command: 'rescanForRepos'}); }); })();</script>
 			</body>`;
@@ -756,7 +782,7 @@ export class GitGraphView extends Disposable {
 				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${standardiseCspSource(this.panel.webview.cspSource)} 'unsafe-inline'; script-src 'nonce-${nonce}'; img-src data:;">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<link rel="stylesheet" type="text/css" href="${this.getMediaUri('out.min.css')}">
-				<title>Git Graph</title>
+				<title>Git History</title>
 				<style>body{${colorVars}} ${colorParams}</style>
 			</head>
 			${body}

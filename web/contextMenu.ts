@@ -1,15 +1,18 @@
-const CLASS_CONTEXT_MENU_ACTIVE = 'contextMenuActive';
+import { findCommitElemWithId } from "./main";
+import { SVG_ICONS, addListenerToClass, alterClass, alterClassOfCollection, getCommitElems } from "./utils";
 
-interface ContextMenuAction {
+export const CLASS_CONTEXT_MENU_ACTIVE = 'contextMenuActive';
+
+export interface ContextMenuAction {
 	readonly title: string;
 	readonly visible: boolean;
-	readonly onClick: () => void;
+	readonly onClick: (e:Event) => void;
 	readonly checked?: boolean; // Required in checked context menus
 }
 
-type ContextMenuActions = ReadonlyArray<ReadonlyArray<ContextMenuAction>>;
+export type ContextMenuActions = ReadonlyArray<ReadonlyArray<ContextMenuAction>>;
 
-type ContextMenuTarget = {
+export type ContextMenuTarget = {
 	type: TargetType.Commit | TargetType.Ref | TargetType.CommitDetailsView;
 	elem: HTMLElement;
 	hash: string;
@@ -18,9 +21,9 @@ type ContextMenuTarget = {
 } | RepoTarget;
 
 /**
- * Implements the Git Graph View's context menus.
+ * Implements the Git History View's context menus.
  */
-class ContextMenu {
+export class ContextMenu {
 	private elem: HTMLElement | null = null;
 	private onClose: (() => void) | null = null;
 	private target: ContextMenuTarget | null = null;
@@ -36,7 +39,7 @@ class ContextMenu {
 	}
 
 	/**
-	 * Show a context menu in the Git Graph View.
+	 * Show a context menu in the Git History View.
 	 * @param actions The collection of actions to display in the context menu.
 	 * @param checked Should the context menu display checks to the left of each action.
 	 * @param target The target that the context menu was triggered on.
@@ -46,7 +49,7 @@ class ContextMenu {
 	 * @param className An optional class name to add to the context menu.
 	 */
 	public show(actions: ContextMenuActions, checked: boolean, target: ContextMenuTarget | null, event: MouseEvent, frameElem: HTMLElement, onClose: (() => void) | null = null, className: string | null = null) {
-		let html = '', handlers: (() => void)[] = [], handlerId = 0;
+		let html = '', handlers: ((e:Event) => void)[] = [], handlerId = 0;
 		this.close();
 
 		for (let i = 0; i < actions.length; i++) {
@@ -92,7 +95,7 @@ class ContextMenu {
 			// The user clicked on a context menu item => call the corresponding handler
 			e.stopPropagation();
 			this.close();
-			handlers[parseInt((<HTMLElement>(<Element>e.target).closest('.contextMenuItem')!).dataset.index!)]();
+			handlers[parseInt((<HTMLElement>(<Element>e.target).closest('.contextMenuItem')!).dataset.index!)](e);
 		});
 
 		menu.addEventListener('click', (e) => {
@@ -107,7 +110,7 @@ class ContextMenu {
 	}
 
 	/**
-	 * Close the context menu (if one is currently open in the Git Graph View).
+	 * Close the context menu (if one is currently open in the Git History View).
 	 */
 	public close() {
 		if (this.elem !== null) {
@@ -123,9 +126,9 @@ class ContextMenu {
 	}
 
 	/**
-	 * Refresh the context menu (if one is currently open in the Git Graph View). If the context menu has a dynamic source,
-	 * re-link it to the newly rendered HTML Element, or close it if the target is no longer visible in the Git Graph View.
-	 * @param commits The new array of commits that is rendered in the Git Graph View.
+	 * Refresh the context menu (if one is currently open in the Git History View). If the context menu has a dynamic source,
+	 * re-link it to the newly rendered HTML Element, or close it if the target is no longer visible in the Git History View.
+	 * @param commits The new array of commits that is rendered in the Git History View.
 	 */
 	public refresh(commits: ReadonlyArray<GG.GitCommit>) {
 		if (!this.isOpen() || this.target === null || this.target.type === TargetType.Repo) {
@@ -163,7 +166,7 @@ class ContextMenu {
 	}
 
 	/**
-	 * Is a context menu currently open in the Git Graph View.
+	 * Is a context menu currently open in the Git History View.
 	 * @returns TRUE => A context menu is open, FALSE => No context menu is open
 	 */
 	public isOpen() {
@@ -171,7 +174,7 @@ class ContextMenu {
 	}
 
 	/**
-	 * Is the target of the context menu dynamic (i.e. is it tied to a Git object & HTML Element in the Git Graph View).
+	 * Is the target of the context menu dynamic (i.e. is it tied to a Git object & HTML Element in the Git History View).
 	 * @returns TRUE => The context menu is dynamic, FALSE => The context menu is not dynamic
 	 */
 	public isTargetDynamicSource() {

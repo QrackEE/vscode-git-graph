@@ -1,3 +1,7 @@
+import * as GG from "./types";
+import { findCommitElemWithId, closeDialogAndContextMenu, abbrevCommit, getBranchLabels } from "./main";
+import { SVG_NAMESPACE, UNCOMMITTED, getCommitElems, ELLIPSIS, escapeHtml } from "./utils";
+
 const CLASS_GRAPH_VERTEX_ACTIVE = 'graphVertexActive';
 const NULL_VERTEX_ID = -1;
 
@@ -35,7 +39,7 @@ type VertexOrNull = Vertex | null;
 
 /* Branch Class */
 
-class Branch {
+export class Branch {
 	private readonly colour: number;
 	private end: number = 0;
 	private lines: Line[] = [];
@@ -297,7 +301,8 @@ class Vertex {
 
 	public draw(svg: SVGElement, config: GG.GraphConfig, expandOffset: boolean, overListener: (event: MouseEvent) => void, outListener: (event: MouseEvent) => void) {
 		if (this.onBranch === null) return;
-
+		// disable expend
+		expandOffset=false;
 		const colour = this.isCommitted ? config.colours[this.onBranch.getColour() % config.colours.length] : '#808080';
 		const cx = (this.x * config.grid.x + config.grid.offsetX).toString();
 		const cy = (this.id * config.grid.y + config.grid.offsetY + (expandOffset ? config.grid.expandY : 0)).toString();
@@ -334,7 +339,7 @@ class Vertex {
 
 /* Graph Class */
 
-class Graph {
+export class Graph {
 	private readonly config: GG.GraphConfig;
 	private readonly muteConfig: GG.MuteCommitsConfig;
 	private vertices: Vertex[] = [];
@@ -358,7 +363,7 @@ class Graph {
 
 	private tooltipId: number = -1;
 	private tooltipElem: HTMLElement | null = null;
-	private tooltipTimeout: NodeJS.Timer | null = null;
+	private tooltipTimeout:  any | null = null;
 	private tooltipVertex: HTMLElement | null = null;
 
 	constructor(id: string, viewElem: HTMLElement, config: GG.GraphConfig, muteConfig: GG.MuteCommitsConfig) {
@@ -390,7 +395,7 @@ class Graph {
 
 	/* Graph Operations */
 
-	public loadCommits(commits: ReadonlyArray<GG.GitCommit>, commitHead: string | null, commitLookup: { [hash: string]: number }, onlyFollowFirstParent: boolean) {
+	public loadCommits(commits: ReadonlyArray<GG.GitCommit>, commitHead: string | null, commitLookup: { [hash: string]: number }, onlyFollowFirstParent: boolean,relPath?:string) {
 		this.commits = commits;
 		this.commitHead = commitHead;
 		this.commitLookup = commitLookup;
@@ -408,7 +413,15 @@ class Graph {
 		for (i = 0; i < commits.length; i++) {
 			for (j = 0; j < commits[i].parents.length; j++) {
 				let parentHash = commits[i].parents[j];
-				if (typeof commitLookup[parentHash] === 'number') {
+				// 如果是单文件, 只生成一条线
+				if(relPath){
+					const nextCommit=commits[i+1];
+					if(nextCommit){
+						this.vertices[i].addParent(this.vertices[i+1]);
+						this.vertices[i+1].addChild(this.vertices[i]);
+					}
+					continue;
+				}else if (typeof commitLookup[parentHash] === 'number') {
 					// Parent is the <commitLookup[parentHash]>th vertex
 					this.vertices[i].addParent(this.vertices[commitLookup[parentHash]]);
 					this.vertices[commitLookup[parentHash]].addChild(this.vertices[i]);

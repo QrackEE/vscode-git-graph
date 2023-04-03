@@ -4,17 +4,17 @@ import { Disposable } from './utils/disposable';
 const DOUBLE_QUOTE_REGEXP = /"/g;
 
 /**
- * Manages the Git Graph Logger, which writes log information to the Git Graph Output Channel.
+ * Manages the Git History Logger, which writes log information to the Git History Output Channel.
  */
 export class Logger extends Disposable {
 	private readonly channel: vscode.OutputChannel;
 
 	/**
-	 * Creates the Git Graph Logger.
+	 * Creates the Git History Logger.
 	 */
 	constructor() {
 		super();
-		this.channel = vscode.window.createOutputChannel('Git Graph');
+		this.channel = vscode.window.createOutputChannel('Git History');
 		this.registerDisposable(this.channel);
 	}
 

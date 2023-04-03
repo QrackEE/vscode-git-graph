@@ -13,15 +13,15 @@ export const enum DiffSide {
 /**
  * Manages providing a specific revision of a repository file for use in the Visual Studio Code Diff View.
  */
-export class DiffDocProvider extends Disposable implements vscode.TextDocumentContentProvider {
+export class DiffDocProvider extends Disposable implements vscode.FileSystemProvider {
 	public static scheme = 'git-graph';
 	private readonly dataSource: DataSource;
 	private readonly docs = new Map<string, DiffDocument>();
 	private readonly onDidChangeEventEmitter = new vscode.EventEmitter<vscode.Uri>();
 
 	/**
-	 * Creates the Git Graph Diff Document Provider.
-	 * @param dataSource The Git Graph DataSource instance.
+	 * Creates the Git History Diff Document Provider.
+	 * @param dataSource The Git History DataSource instance.
 	 */
 	constructor(dataSource: DataSource) {
 		super();
@@ -33,6 +33,47 @@ export class DiffDocProvider extends Disposable implements vscode.TextDocumentCo
 			toDisposable(() => this.docs.clear())
 		);
 	}
+	private _onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+	get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]> {
+		return this._onDidChangeFile.event;
+	}
+	watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
+		return {
+			dispose: () => {
+				// nothing to dispose
+			},
+		};
+	}
+	stat(uri: vscode.Uri): vscode.FileStat | Thenable<vscode.FileStat> {
+		return{
+			type: vscode.FileType.File,
+			size: 0,
+			ctime: 0,
+			mtime: 0,
+		}
+	}
+	readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
+		throw new Error('Method not implemented.');
+	}
+	createDirectory(uri: vscode.Uri): void | Thenable<void> {
+		throw new Error('Method not implemented.');
+	}
+	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
+		const request = decodeDiffDocUri(uri);
+		// if (!request.exists) {
+		// 	return new Buffer(0);
+		// }
+		return this.dataSource.getCommitFile(request.repo, request.commit, request.filePath)
+	}
+	writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
+		throw new Error('Method not implemented.');
+	}
+	delete(uri: vscode.Uri, options: { recursive: boolean; }): void | Thenable<void> {
+		throw new Error('Method not implemented.');
+	}
+	rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean; }): void | Thenable<void> {
+		throw new Error('Method not implemented.');
+	}
 
 	/**
 	 * An event to signal a resource has changed.
@@ -41,35 +82,6 @@ export class DiffDocProvider extends Disposable implements vscode.TextDocumentCo
 		return this.onDidChangeEventEmitter.event;
 	}
 
-	/**
-	 * Provides the content of a text document at a specific Git revision.
-	 * @param uri The `git-graph://file.ext?encoded-data` URI.
-	 * @returns The content of the text document.
-	 */
-	public provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
-		const document = this.docs.get(uri.toString());
-		if (document) {
-			return document.value;
-		}
-
-		const request = decodeDiffDocUri(uri);
-		if (!request.exists) {
-			// Return empty file (used for one side of added / deleted file diff)
-			return '';
-		}
-
-		return this.dataSource.getCommitFile(request.repo, request.commit, request.filePath).then(
-			(contents) => {
-				const document = new DiffDocument(contents);
-				this.docs.set(uri.toString(), document);
-				return document.value;
-			},
-			(errorMessage) => {
-				showErrorMessage('Unable to retrieve file: ' + errorMessage);
-				return '';
-			}
-		);
-	}
 }
 
 /**
@@ -137,7 +149,7 @@ export function encodeDiffDocUri(repo: string, filePath: string, commit: string,
 		extension = extIndex > -1 ? data.filePath.substring(extIndex) : '';
 	}
 
-	return vscode.Uri.file('file' + extension).with({
+	return vscode.Uri.file(filePath).with({
 		scheme: DiffDocProvider.scheme,
 		query: Buffer.from(JSON.stringify(data)).toString('base64')
 	});

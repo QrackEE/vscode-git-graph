@@ -1,8 +1,8 @@
 /**
- * Git Graph generates an event when it is installed, updated, or uninstalled, that is anonymous, non-personal, and cannot be correlated.
- * - Each event only contains the Git Graph and Visual Studio Code version numbers, and a 256 bit cryptographically strong pseudo-random nonce.
+ * Git History generates an event when it is installed, updated, or uninstalled, that is anonymous, non-personal, and cannot be correlated.
+ * - Each event only contains the Git History and Visual Studio Code version numbers, and a 256 bit cryptographically strong pseudo-random nonce.
  * - The two version numbers recorded in these events only allow aggregate compatibility information to be generated (e.g. 50% of users are
- *   using Visual Studio Code >= 1.41.0). These insights enable Git Graph to utilise the latest features of Visual Studio Code as soon as
+ *   using Visual Studio Code >= 1.41.0). These insights enable Git History to utilise the latest features of Visual Studio Code as soon as
  *   the majority of users are using a compatible version. The data cannot, and will not, be used for any other purpose.
  * - Full details are available at: https://api.mhutchie.com/vscode-git-graph/about
  */
@@ -14,8 +14,8 @@ import { LifeCycleStage, LifeCycleState, generateNonce, getDataDirectory, getLif
 import { getExtensionVersion } from '../utils';
 
 /**
- * Run on startup to detect if Git Graph has been installed or updated, and if so generate an event.
- * @param extensionContext The extension context of Git Graph.
+ * Run on startup to detect if Git History has been installed or updated, and if so generate an event.
+ * @param extensionContext The extension context of Git History.
  */
 export async function onStartUp(extensionContext: vscode.ExtensionContext) {
 	if (vscode.env.sessionId === 'someValue.sessionId') {
@@ -36,7 +36,7 @@ export async function onStartUp(extensionContext: vscode.ExtensionContext) {
 	};
 
 	if (state === null || state.current.extension !== versions.extension) {
-		// This is the first startup after installing Git Graph, or Git Graph has been updated since the last startup.
+		// This is the first startup after installing Git History, or Git History has been updated since the last startup.
 		const nonce = await getNonce();
 
 		if (state === null) {
@@ -83,8 +83,8 @@ export async function onStartUp(extensionContext: vscode.ExtensionContext) {
 
 /**
  * Saves the life cycle state to the extensions global storage directory (for use during future updates),
- * and to a directory in this Git Graph installation (for use during future uninstalls).
- * @param extensionContext The extension context of Git Graph.
+ * and to a directory in this Git History installation (for use during future uninstalls).
+ * @param extensionContext The extension context of Git History.
  * @param state The state to save.
  */
 function saveLifeCycleState(extensionContext: vscode.ExtensionContext, state: LifeCycleState) {
@@ -95,7 +95,7 @@ function saveLifeCycleState(extensionContext: vscode.ExtensionContext, state: Li
 }
 
 /**
- * Get a nonce generated for this installation of Git Graph.
+ * Get a nonce generated for this installation of Git History.
  * @returns A 256 bit cryptographically strong pseudo-random nonce.
  */
 function getNonce() {

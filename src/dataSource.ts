@@ -1,12 +1,14 @@
 import * as cp from 'child_process';
 import * as fs from 'fs';
-import { decode, encodingExists } from 'iconv-lite';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { AskpassEnvironment, AskpassManager } from './askpass/askpassManager';
 import { getConfig } from './config';
+import { ExtensionState } from './extensionState';
+import { Repository } from './git';
+import { GitAPi } from './gitApi';
 import { Logger } from './logger';
-import { CommitOrdering, DateType, DeepWriteable, ErrorInfo, ErrorInfoExtensionPrefix, GitCommit, GitCommitDetails, GitCommitStash, GitConfigLocation, GitFileChange, GitFileStatus, GitPushBranchMode, GitRepoConfig, GitRepoConfigBranches, GitResetMode, GitSignature, GitSignatureStatus, GitStash, GitTagDetails, MergeActionOn, RebaseActionOn, SquashMessageFormat, TagType, Writeable } from './types';
+import { RequestLoadCommits, ActionedUser, CommitOrdering, DateType, DeepWriteable, ErrorInfo, ErrorInfoExtensionPrefix, GitCommit, GitCommitDetails, GitCommitStash, GitConfigLocation, GitFileChange, GitFileStatus, GitPushBranchMode, GitRepoConfig, GitRepoConfigBranches, GitResetMode, GitSignature, GitSignatureStatus, GitStash, GitTagDetails, MergeActionOn, RebaseActionOn, SquashMessageFormat, TagType, Writeable } from './types';
 import { GitExecutable, GitVersionRequirement, UNABLE_TO_FIND_GIT_MSG, UNCOMMITTED, abbrevCommit, constructIncompatibleGitVersionMessage, doesVersionMeetRequirement, getPathFromStr, getPathFromUri, openGitTerminal, pathWithTrailingSlash, realpath, resolveSpawnOutput, showErrorMessage } from './utils';
 import { Disposable } from './utils/disposable';
 import { Event } from './utils/event';
@@ -38,6 +40,7 @@ const GPG_STATUS_CODE_PARSING_DETAILS: Readonly<{ [statusCode: string]: GpgStatu
  * Interfaces Git Graph with the Git executable to provide all Git integrations.
  */
 export class DataSource extends Disposable {
+	public extensionState?: ExtensionState;
 	private readonly logger: Logger;
 	private readonly askpassEnv: AskpassEnvironment;
 	private gitExecutable!: GitExecutable | null;
@@ -161,10 +164,11 @@ export class DataSource extends Disposable {
 	 * @param stashes An array of all stashes in the repository.
 	 * @returns The commits in the repository.
 	 */
-	public getCommits(repo: string, branches: ReadonlyArray<string> | null, maxCommits: number, showTags: boolean, showRemoteBranches: boolean, includeCommitsMentionedByReflogs: boolean, onlyFollowFirstParent: boolean, commitOrdering: CommitOrdering, remotes: ReadonlyArray<string>, hideRemotes: ReadonlyArray<string>, stashes: ReadonlyArray<GitStash>): Promise<GitCommitData> {
+	public getCommits(loadRequest: RequestLoadCommits, relPath?: string): Promise<GitCommitData> {
+		const { repo, branches, maxCommits, showTags, showRemoteBranches, includeCommitsMentionedByReflogs, onlyFollowFirstParent, commitOrdering, remotes, hideRemotes, stashes, author, searchValue } = loadRequest;
 		const config = getConfig();
 		return Promise.all([
-			this.getLog(repo, branches, maxCommits + 1, showTags && config.showCommitsOnlyReferencedByTags, showRemoteBranches, includeCommitsMentionedByReflogs, onlyFollowFirstParent, commitOrdering, remotes, hideRemotes, stashes),
+			this.getLog(repo, branches, maxCommits + 1, showTags && config.showCommitsOnlyReferencedByTags, showRemoteBranches, includeCommitsMentionedByReflogs, onlyFollowFirstParent, commitOrdering, remotes, hideRemotes, stashes, author, searchValue, relPath),
 			this.getRefs(repo, showRemoteBranches, config.showRemoteHeads, hideRemotes).then((refData: GitRefData) => refData, (errorMessage: string) => errorMessage)
 		]).then(async (results) => {
 			let commits: GitCommitRecord[] = results[0], refData: GitRefData | string = results[1], i;
@@ -263,6 +267,7 @@ export class DataSource extends Disposable {
 			return {
 				commits: commitNodes,
 				head: refData.head,
+				relPath,
 				tags: unique(refData.tags.map((tag) => tag.name)),
 				moreCommitsAvailable: moreCommitsAvailable,
 				error: null
@@ -282,9 +287,10 @@ export class DataSource extends Disposable {
 		return Promise.all([
 			this.getConfigList(repo),
 			this.getConfigList(repo, GitConfigLocation.Local),
-			this.getConfigList(repo, GitConfigLocation.Global)
+			this.getConfigList(repo, GitConfigLocation.Global),
+			this.getAuthorList(repo),
 		]).then((results) => {
-			const consolidatedConfigs = results[0], localConfigs = results[1], globalConfigs = results[2];
+			const { 0: consolidatedConfigs, 1: localConfigs, 2: globalConfigs, 3: authors } = results;
 
 			const branches: GitRepoConfigBranches = {};
 			Object.keys(localConfigs).forEach((key) => {
@@ -308,6 +314,7 @@ export class DataSource extends Disposable {
 			return {
 				config: {
 					branches: branches,
+					authors,
 					diffTool: getConfigValue(consolidatedConfigs, GitConfigKey.DiffTool),
 					guiDiffTool: getConfigValue(consolidatedConfigs, GitConfigKey.DiffGuiTool),
 					pushDefault: getConfigValue(consolidatedConfigs, GitConfigKey.RemotePushDefault),
@@ -421,7 +428,7 @@ export class DataSource extends Disposable {
 	 * @returns The comparison details.
 	 */
 	public getCommitComparison(repo: string, fromHash: string, toHash: string): Promise<GitCommitComparisonData> {
-		return Promise.all<DiffNameStatusRecord[], DiffNumStatRecord[], GitStatusFiles | null>([
+		return Promise.all([
 			this.getDiffNameStatus(repo, fromHash, toHash === UNCOMMITTED ? '' : toHash),
 			this.getDiffNumStat(repo, fromHash, toHash === UNCOMMITTED ? '' : toHash),
 			toHash === UNCOMMITTED ? this.getStatus(repo) : Promise.resolve(null)
@@ -442,11 +449,10 @@ export class DataSource extends Disposable {
 	 * @param filePath The path of the file relative to the repositories root.
 	 * @returns The file contents.
 	 */
-	public getCommitFile(repo: string, commitHash: string, filePath: string) {
-		return this._spawnGit(['show', commitHash + ':' + filePath], repo, stdout => {
-			const encoding = getConfig(repo).fileEncoding;
-			return decode(stdout, encodingExists(encoding) ? encoding : 'utf8');
-		});
+	public async getCommitFile(repo: string, commitHash: string, filePath: string) {
+		const repositoryPath = this.extensionState!.getLastActiveRepo() as string
+		const repository = await GitAPi.getRepo(repositoryPath)
+		return repository.buffer(commitHash, path.join(repository.rootUri.fsPath, filePath));
 	}
 
 
@@ -1424,6 +1430,60 @@ export class DataSource extends Disposable {
 	}
 
 	/**
+	 * Get the configuration list of a repository.
+	 * @param repo The path of the repository.
+	 * @param location The location of the configuration to be listed.
+	 * @returns A set of key-value pairs of Git configuration records.
+	 */
+	private async getAuthorList(repo: string): Promise<ActionedUser[]> {
+		const args = ['shortlog', '-e', '-s', '-n', 'HEAD'];
+		const dict = new Set<string>();
+		const result = await this.spawnGit(args, repo, (authors) => {
+			return authors.split(/\r?\n/g)
+				.map(line => line.trim())
+				.filter(line => line.trim().length > 0)
+				.map(line => line.substring(line.indexOf('\t') + 1))
+				.map(line => {
+					const indexOfEmailSeparator = line.indexOf('<');
+					if (indexOfEmailSeparator === -1) {
+						return {
+							name: line.trim(),
+							email: '',
+						};
+					} else {
+						const nameParts = line.split('<');
+						const name = nameParts.shift()!.trim();
+						const email = nameParts[0].substring(0, nameParts[0].length - 1).trim();
+						return {
+							name,
+							email,
+						};
+					}
+				})
+				.filter(item => {
+					if (dict.has(item.name)) {
+						return false;
+					}
+					dict.add(item.name);
+					return true;
+				})
+				.sort((a, b) => (a.name > b.name ? 1 : -1));
+		}).catch((errorMessage) => {
+			if (typeof errorMessage === 'string') {
+				const message = errorMessage.toLowerCase();
+				if (message.startsWith('fatal: unable to read config file') && message.endsWith('no such file or directory')) {
+					// If the Git command failed due to the configuration file not existing, return an empty list instead of throwing the exception
+					return {};
+				}
+			} else {
+				errorMessage = 'An unexpected error occurred while spawning the Git child process.';
+			}
+			throw errorMessage;
+		}) as Promise<ActionedUser[]>;
+		return result;
+	}
+
+	/**
 	 * Get the diff `--name-status` records.
 	 * @param repo The path of the repository.
 	 * @param fromHash The revision the diff is from.
@@ -1496,10 +1556,16 @@ export class DataSource extends Disposable {
 	 * @param stashes An array of all stashes in the repository.
 	 * @returns An array of commits.
 	 */
-	private getLog(repo: string, branches: ReadonlyArray<string> | null, num: number, includeTags: boolean, includeRemotes: boolean, includeCommitsMentionedByReflogs: boolean, onlyFollowFirstParent: boolean, order: CommitOrdering, remotes: ReadonlyArray<string>, hideRemotes: ReadonlyArray<string>, stashes: ReadonlyArray<GitStash>) {
+	private getLog(repo: string, branches: ReadonlyArray<string> | null, num: number, includeTags: boolean, includeRemotes: boolean, includeCommitsMentionedByReflogs: boolean, onlyFollowFirstParent: boolean, order: CommitOrdering, remotes: ReadonlyArray<string>, hideRemotes: ReadonlyArray<string>, stashes: ReadonlyArray<GitStash>, author?: string, searchValue?: string, relPath?: string) {
 		const args = ['-c', 'log.showSignature=false', 'log', '--max-count=' + num, '--format=' + this.gitFormatLog, '--' + order + '-order'];
 		if (onlyFollowFirstParent) {
 			args.push('--first-parent');
+		}
+		if (author) {
+			args.push(`--author=${author}`)
+		}
+		if (searchValue) {
+			args.push(`--grep=${searchValue}`)
 		}
 		if (branches !== null) {
 			for (let i = 0; i < branches.length; i++) {
@@ -1527,6 +1593,9 @@ export class DataSource extends Disposable {
 			args.push('HEAD');
 		}
 		args.push('--');
+		if (relPath) {
+			args.push("--follow", relPath)
+		}
 
 		return this.spawnGit(args, repo, (stdout) => {
 			let lines = stdout.split(EOL_REGEX);

@@ -171,9 +171,9 @@ export function getRelativeTimeDiff(unixTimestamp: number) {
 }
 
 /**
- * Gets the version of Git Graph.
- * @param extensionContext The extension context of Git Graph.
- * @returns The Git Graph version.
+ * Gets the version of Git History.
+ * @param extensionContext The extension context of Git History.
+ * @returns The Git History version.
  */
 export function getExtensionVersion(extensionContext: vscode.ExtensionContext) {
 	return new Promise<string>((resolve, reject) => {
@@ -339,13 +339,13 @@ export function createPullRequest(config: PullRequestConfig, sourceOwner: string
 }
 
 /**
- * Open the Visual Studio Code Settings Editor to the Git Graph Extension Settings.
+ * Open the Visual Studio Code Settings Editor to the Git History Extension Settings.
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
 export function openExtensionSettings(): Thenable<ErrorInfo> {
 	return vscode.commands.executeCommand('workbench.action.openSettings', '@ext:mhutchie.git-graph').then(
 		() => null,
-		() => 'Visual Studio Code was unable to open the Git Graph Extension Settings.'
+		() => 'Visual Studio Code was unable to open the Git History Extension Settings.'
 	);
 }
 
@@ -415,21 +415,28 @@ export async function openFile(repo: string, filePath: string, hash: string | nu
  * @param type The Git file status of the change.
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
-export function viewDiff(repo: string, fromHash: string, toHash: string, oldFilePath: string, newFilePath: string, type: GitFileStatus) {
+export function viewDiff(repo: string, fromHash: string, toHash: string, oldFilePath: string, newFilePath: string, type: GitFileStatus, fileUrl?: vscode.Uri) {
 	if (type !== GitFileStatus.Untracked) {
 		let abbrevFromHash = abbrevCommit(fromHash), abbrevToHash = toHash !== UNCOMMITTED ? abbrevCommit(toHash) : 'Present', pathComponents = newFilePath.split('/');
 		let desc = fromHash === toHash
 			? fromHash === UNCOMMITTED
 				? 'Uncommitted'
-				: (type === GitFileStatus.Added ? 'Added in ' + abbrevToHash : type === GitFileStatus.Deleted ? 'Deleted in ' + abbrevToHash : abbrevFromHash + '^ ↔ ' + abbrevToHash)
-			: (type === GitFileStatus.Added ? 'Added between ' + abbrevFromHash + ' & ' + abbrevToHash : type === GitFileStatus.Deleted ? 'Deleted between ' + abbrevFromHash + ' & ' + abbrevToHash : abbrevFromHash + ' ↔ ' + abbrevToHash);
+				: (type === GitFileStatus.Added ? `Added in ${abbrevToHash}` : type === GitFileStatus.Deleted ? `Deleted in ${abbrevToHash}` : `${abbrevFromHash}^1 ↔ ${abbrevToHash}`)
+			: (type === GitFileStatus.Added ? `Added between ${abbrevFromHash} & ${abbrevToHash}` : type === GitFileStatus.Deleted ? `Deleted between ${abbrevFromHash} & ${abbrevToHash}` : `${abbrevFromHash} ↔ ${abbrevToHash}`);
 		let title = pathComponents[pathComponents.length - 1] + ' (' + desc + ')';
 		if (fromHash === UNCOMMITTED) fromHash = 'HEAD';
 
-		return vscode.commands.executeCommand('vscode.diff', encodeDiffDocUri(repo, oldFilePath, fromHash === toHash ? fromHash + '^' : fromHash, type, DiffSide.Old), encodeDiffDocUri(repo, newFilePath, toHash, type, DiffSide.New), title, {
+		const oldHash = (fromHash === toHash && type != GitFileStatus.Added) ? fromHash + '^' : fromHash;
+		const oldUrl = encodeDiffDocUri(repo, oldFilePath, oldHash, type, DiffSide.Old);
+		if ([GitFileStatus.Deleted, GitFileStatus.Added].includes(type)) {
+			vscode.commands.executeCommand('vscode.openWith', oldUrl, "default", vscode.ViewColumn.One);
+			return null;
+		}
+		const newUrl = encodeDiffDocUri(repo, newFilePath, toHash, type, DiffSide.New);
+		return vscode.commands.executeCommand('vscode.diff', oldUrl, newUrl, title, {
 			preview: true,
-			viewColumn: getConfig().openNewTabEditorGroup
-		}).then(
+			viewColumn: fileUrl ? vscode.ViewColumn.One : getConfig().openNewTabEditorGroup
+		} as vscode.TextDocumentShowOptions).then(
 			() => null,
 			() => 'Visual Studio Code was unable to load the diff editor for ' + newFilePath + '.'
 		);
@@ -446,7 +453,7 @@ export function viewDiff(repo: string, fromHash: string, toHash: string, oldFile
  * @param dataSource A DataSource instance, that's used to check if the file has been renamed.
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
-export async function viewDiffWithWorkingFile(repo: string, hash: string, filePath: string, dataSource: DataSource) {
+export async function viewDiffWithWorkingFile(repo: string, hash: string, filePath: string, dataSource: DataSource, fileUrl?: vscode.Uri) {
 	let newFilePath = filePath;
 	let fileExists = await doesFileExist(path.join(repo, newFilePath));
 	if (!fileExists) {
@@ -463,7 +470,7 @@ export async function viewDiffWithWorkingFile(repo: string, hash: string, filePa
 			: GitFileStatus.Renamed
 		: GitFileStatus.Deleted;
 
-	return viewDiff(repo, hash, UNCOMMITTED, filePath, newFilePath, type);
+	return viewDiff(repo, hash, UNCOMMITTED, filePath, newFilePath, type, fileUrl);
 }
 
 /**
@@ -474,13 +481,12 @@ export async function viewDiffWithWorkingFile(repo: string, hash: string, filePa
  * @returns A promise resolving to the ErrorInfo of the executed command.
  */
 export function viewFileAtRevision(repo: string, hash: string, filePath: string) {
-	const pathComponents = filePath.split('/');
-	const title = abbrevCommit(hash) + ': ' + pathComponents[pathComponents.length - 1];
+	const title = `${path.basename(filePath)} (${abbrevCommit(hash)})`;
 
-	return vscode.commands.executeCommand('vscode.open', encodeDiffDocUri(repo, filePath, hash, GitFileStatus.Modified, DiffSide.New).with({ path: title }), {
+	return vscode.commands.executeCommand('vscode.open', encodeDiffDocUri(repo, filePath, hash, GitFileStatus.Modified, DiffSide.New), {
 		preview: true,
 		viewColumn: getConfig().openNewTabEditorGroup
-	}).then(
+	}, title).then(
 		() => null,
 		() => 'Visual Studio Code was unable to open ' + filePath + ' at commit ' + abbrevCommit(hash) + '.'
 	);
@@ -511,7 +517,7 @@ export function openGitTerminal(cwd: string, gitPath: string, command: string | 
 
 	const options: vscode.TerminalOptions = {
 		cwd: cwd,
-		name: 'Git Graph: ' + name,
+		name: 'Git History: ' + name,
 		env: { 'PATH': p }
 	};
 	const shell = getConfig().integratedTerminalShell;
@@ -525,7 +531,7 @@ export function openGitTerminal(cwd: string, gitPath: string, command: string | 
 }
 
 /**
- * Check whether Git Graph is running on a Windows-based platform.
+ * Check whether Git History is running on a Windows-based platform.
  * @returns TRUE => Windows-based platform, FALSE => Not a Windows-based platform.
  */
 function isWindows() {
@@ -640,8 +646,8 @@ export interface GitExecutable {
 }
 
 /**
- * Find a Git executable that Git Graph can use.
- * @param extensionState The Git Graph ExtensionState instance.
+ * Find a Git executable that Git History can use.
+ * @param extensionState The Git History ExtensionState instance.
  * @returns A Git executable.
  */
 export async function findGit(extensionState: ExtensionState) {
@@ -670,7 +676,7 @@ export async function findGit(extensionState: ExtensionState) {
 }
 
 /**
- * Find a Git executable on a Darwin-based platform that Git Graph can use.
+ * Find a Git executable on a Darwin-based platform that Git History can use.
  * @returns A Git executable.
  */
 function findGitOnDarwin() {
@@ -697,7 +703,7 @@ function findGitOnDarwin() {
 }
 
 /**
- * Find a Git executable on a Windows-based platform that Git Graph can use.
+ * Find a Git executable on a Windows-based platform that Git History can use.
  * @returns A Git executable.
  */
 function findGitOnWin32() {

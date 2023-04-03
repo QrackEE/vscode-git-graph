@@ -1,4 +1,6 @@
-import * as GG from '../out/types'; // Import types from back-end (requires `npm run compile-src`)
+import { FindWidgetState } from './findWidget';
+import { SettingsWidgetState } from './settingsWidget';
+import * as GG from './types'; // Import types from back-end (requires `npm run compile-src`)
 
 declare global {
 
@@ -45,6 +47,7 @@ declare global {
 	}
 
 	interface WebViewState {
+		readonly mousePosition: { x: number, y: number };
 		readonly currentRepo: string;
 		readonly currentRepoLoading: boolean;
 		readonly gitRepos: GG.GitRepoSet;
@@ -63,6 +66,10 @@ declare global {
 		readonly onlyFollowFirstParent: boolean;
 		readonly expandedCommit: ExpandedCommit | null;
 		readonly scrollTop: number;
+		readonly contentScrollTop: number | undefined;
+		readonly filterCurrent: boolean;
+		readonly searchValue: string | null;
+		readonly currentAuthors: string[];
 		readonly findWidget: FindWidgetState;
 		readonly settingsWidget: SettingsWidgetState;
 	}

@@ -1,16 +1,19 @@
+import { abbrevCommit, findCommitElemWithId, getBranchLabels, GitGraphView } from "./main";
+import { handledEvent, alterClass, updateWorkspaceViewState, modifyColourOpacity, getCommitElems, formatShortDate, getChildNodesWithTextContent, getChildrenWithClassName, ATTR_ERROR, CLASS_ACTIVE, CLASS_DISABLED, CLASS_TRANSITION, SVG_ICONS, UNCOMMITTED } from "./utils";
+
 const CLASS_FIND_CURRENT_COMMIT = 'findCurrentCommit';
 const CLASS_FIND_MATCH = 'findMatch';
 
-interface FindWidgetState {
+export interface FindWidgetState {
 	readonly text: string;
 	readonly currentHash: string | null;
 	readonly visible: boolean;
 }
 
 /**
- * Implements the Git Graph View's Find Widget.
+ * Implements the Git History View's Find Widget.
  */
-class FindWidget {
+export class FindWidget {
 	private readonly view: GitGraphView;
 	private text: string = '';
 	private matches: { hash: string, elem: HTMLElement }[] = [];
@@ -27,7 +30,7 @@ class FindWidget {
 
 	/**
 	 * Construct a new FindWidget instance.
-	 * @param view The Git Graph View that the FindWidget is for.
+	 * @param view The Git History View that the FindWidget is for.
 	 * @returns The FindWidget instance.
 	 */
 	constructor(view: GitGraphView) {
@@ -38,7 +41,7 @@ class FindWidget {
 		document.body.appendChild(this.widgetElem);
 
 		this.inputElem = <HTMLInputElement>document.getElementById('findInput')!;
-		let keyupTimeout: NodeJS.Timer | null = null;
+		let keyupTimeout: any | null = null;
 		this.inputElem.addEventListener('keyup', (e) => {
 			if ((e.keyCode ? e.keyCode === 13 : e.key === 'Enter') && this.text !== '') {
 				if (e.shiftKey) {
@@ -221,7 +224,7 @@ class FindWidget {
 				findPattern = new RegExp(regexText, flags);
 				findGlobalPattern = new RegExp(regexText, 'g' + flags);
 				this.widgetElem.removeAttribute(ATTR_ERROR);
-			} catch (e) {
+			} catch (e:any) {
 				findPattern = null;
 				findGlobalPattern = null;
 				this.widgetElem.setAttribute(ATTR_ERROR, e.message);
