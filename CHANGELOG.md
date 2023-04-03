@@ -1,5 +1,9 @@
 # Change Log
 
+# 2.2.4 2023-4-3
+
+- Restore the status bar icon used to show history.
+
 # 2.2.3 2023-3-22
 
 - Support view add and removed files.
